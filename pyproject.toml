@@ -7,3 +7,24 @@ requires-python = ">=3.13"
 dependencies = [
     "ruff>=0.9.9",
 ]
+
+[tool.ruff.lint]
+select = [
+  "S",    # Bandit
+  "B",    # Bugbear
+  "C4",   # flake8-comprehensions
+  "LOG",  # flake8-logging
+  "G",    # flake8-logging-format
+  "PT",   # flake8-pytest-style
+  "B",    # flake8-bugbear
+  "F",    # Pyflakes
+  "E",    # Pydocstyle errors
+  "W",    # Pydocstyle warnings
+  "D",    # Pydocstyle
+  "I",    # isort
+  "UP",   # pyupgrade
+  "SIM",  # flake8-simplify
+  "PL",   # Pylint
+  "FURB", # refurb
+  "RUF",  # RUF
+]
