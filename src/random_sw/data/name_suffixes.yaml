@@ -1,11 +1,27 @@
-- Jr.
-- Sr.
-- II
-- III
-- IV
-- V
-- VI
-- VII
-- VIII
-- IX
-- X
+- value: Jr.
+- value: Sr.
+- value: II
+- value: III
+- value: IV
+- value: V
+- value: VI
+- value: VII
+- value: VIII
+- value: IX
+- value: X
+- value: JD
+  qualifier: AC
+- value: MD
+  qualifier: AC
+- value: DO
+  qualifier: AC
+- value: PharmD
+  qualifier: AC
+- value: DMin
+  qualifier: AC
+- value: M.D.
+  qualifier: AC
+- value: Ph.D.
+  qualifier: AC
+- value: CMA
+  qualifier: AC

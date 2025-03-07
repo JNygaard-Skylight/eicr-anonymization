@@ -1,5 +1,6 @@
 """Get random Star Wars themed data."""
 
+import string
 from random import choice, randint
 
 import yaml
@@ -35,24 +36,33 @@ with open(_street_type_list_file) as f:
     _street_types = yaml.safe_load(f)
 
 
-def get_random_family_name():
+def get_random_family_name(old_value: str, attributes: dict[str, str]):
     """Get a random Star Wars themed family name."""
     return choice(_family_names)
 
-def get_random_given_name():
+
+def get_random_given_name(old_value: str, attributes: dict[str, str]):
     """Get a random Star Wars themed given name."""
+    if len(old_value) == 1:
+        return choice(string.ascii_uppercase)
     return choice(_given_names)
 
-def get_random_name_prefix():
+
+def get_random_name_prefix(old_value: str, attributes: dict[str, str]):
     """Get a random Star Wars themed name prefix."""
     return choice(_name_prefixes)
 
 
-def get_random_name_suffix():
+def get_random_name_suffix(old_value: str, attributes: dict[str, str]):
     """Get a random Star Wars themed name suffix."""
-    return choice(_name_suffixes)
+    if attributes.get("qualifier") == "AC":
+        return choice(
+            [suffix["value"] for suffix in _name_suffixes if suffix.get("qualifier") == "AC"]
+        )
+    else:
+        return choice(_name_suffixes)["value"]
 
 
-def get_random_street_address():
+def get_random_street_address(old_value: str, attributes: dict[str, str]):
     """Get a random Star Wars themed street address."""
     return f"{randint(1, 9999)} {choice(_street_names)} {choice(_street_types)}"
