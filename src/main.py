@@ -10,6 +10,7 @@ from random_sw.main import (
     get_random_given_name,
     get_random_name_prefix,
     get_random_name_suffix,
+    get_random_street_address_line,
 )
 
 
@@ -60,6 +61,7 @@ def simple_replacement_regex(xml_text: str) -> str:
         ("given", get_random_given_name),
         ("prefix", get_random_name_prefix),
         ("suffix", get_random_name_suffix),
+        ("streetAddressLine", get_random_street_address_line),
     ]
 
     for tag, get_random_value in sensitive_fields:
@@ -74,8 +76,9 @@ def simple_replacement_regex(xml_text: str) -> str:
                 # Leave self-closing tags unchanged.
                 return match.group(0)
 
+            stripped_inner_text = inner_text.strip()
             attributes = parse_attributes(open_tag)
-            norm = inner_text.strip()
+            norm = stripped_inner_text.lower()
 
             # Preserve the original leading/trailing whitespace.
             leading = inner_text[: len(inner_text) - len(inner_text.lstrip())]
@@ -83,13 +86,14 @@ def simple_replacement_regex(xml_text: str) -> str:
             if norm in data_cache:
                 new_value = data_cache[norm]
             else:
-                new_value = get_random_value(norm, attributes) if norm else norm
+                new_value = get_random_value(stripped_inner_text, attributes)
                 data_cache[norm] = new_value
             return f"{open_tag}{leading}{new_value}{trailing}{closing_tag}"
 
         xml_text, count = pattern.subn(repl, xml_text)
         print(f"Replaced {count} instances of {len(data_cache)} unique <{tag}> values ")
 
+    # print(xml_text)
     return xml_text
 
 
