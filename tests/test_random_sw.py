@@ -71,20 +71,20 @@ class TestGetRandomStreetAddressLine:
     def test_get_random_street_address_line_with_multi_word_name(self):
         """Test the get_random_street_address_line function for an address with a multi-word name."""
         orginal_value = "12 Cedar Ridge Court"
-        expected = "32 Harbor District Cir"
+        expected = "27 Spire Blvd"
         actual = get_random_street_address_line(orginal_value)
         assert actual == expected
 
     def test_get_random_street_address_line_pre_direction(self):
         """Test the get_random_street_address_line function for an address with a pre-direction."""
         orginal_value = "320 NE Maple Drive"
-        expected = "325 N Scarif Shores Rd"
+        expected = "237 NE Harbor District Cir"
         actual = get_random_street_address_line(orginal_value)
         assert actual == expected
 
     def test_get_random_street_address_line_post_direction(self):
         """Test the get_random_street_address_line function for an address with a post-direction."""
         orginal_value = "7820 Oakwood Drive SE"
-        expected = "3252 Scarif Shores Rd S"
+        expected = "3201 Spire Blvd SE"
         actual = get_random_street_address_line(orginal_value)
         assert actual == expected

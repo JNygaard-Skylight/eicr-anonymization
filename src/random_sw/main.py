@@ -4,6 +4,7 @@ import re
 import string
 from random import choice, randint
 
+import usaddress
 import yaml
 
 
@@ -57,39 +58,31 @@ def _get_random_int(digits: int):
 def get_random_street_address_line(old_value: str, attributes: dict[str, str] | None = None):
     """Get a random Star Wars themed street address."""
     # Get the number of digits in the house number
-    pattern = re.compile(r"\d")
-    new_value = pattern.sub(lambda x: str(_get_random_int(1)), old_value)
+    print(old_value)
+    parsed_address = usaddress.tag(old_value)
+    print(parsed_address)
 
-    # change direction
-    pattern = re.compile(r"(?<=\s)([NESW]|NE|SE|SW|NW)(?=\.?\s)")
-    new_value = pattern.sub(lambda _: choice(["N", "NE", "E", "SE", "S", "SW", "NW"]), new_value)
+    new_value = ""
+    for  key, value in parsed_address[0].items():
+        if key == "AddressNumber":
+            digits = len(value)
+            new_house_number = _get_random_int(digits)
+            new_value += f"{new_house_number} "
+        elif key == "StreetNamePreDirectional":
+            new_value += choice(["N", "NE", "E", "SE", "S", "SW", "W", "NW"]) + " "
+        elif key == "StreetNamePostType":
+            new_value += f"{choice(_street_types)} "
+        elif key == "StreetName":
+            new_value += f"{choice(_street_names)} "
+        elif key == "OccupancyIdentifier":
+            pattern = re.compile(r"\d")
+            new_occupancy_identifier = pattern.sub(
+                lambda x: str(_get_random_int(1)), value
+            )
+            new_value += f"{new_occupancy_identifier}"
+        else:
+            new_value += f"{value}"
 
-    pattern = re.compile(
-        r"((?P<house_number>\d+)\s)((?P<pre_direction>([NESW]|NE|SE|SW|NW)\.?)\s)?((?P<street_name>([A-Za-z]{3,}|\s)+)|(?P<numeric_street_name>\d+(st|nd|rd|th)))\s+(?P<street_type>[A-Za-z]+)(?P<post_direction>\s(([NESW]|NE|SE|SW|NW)\.?)\s)?(?P<unit>.*$)",
-        re.IGNORECASE,
-    )
-    match = pattern.match(new_value)
-
-    if match.group("street_name"):
-        new_street_name = choice(_street_names)
-    elif match.group("numeric_street_name"):
-        new_street_name = choice(_numeric_street_names)
-
-    if match.group("street_type"):
-        new_street_type = choice(_street_types)
-
-    new_value = " ".join(
-        filter(
-            lambda x: x,
-            [
-                match.group("house_number"),
-                match.group("pre_direction"),
-                new_street_name,
-                new_street_type,
-                match.group("post_direction"),
-                match.group("unit").lstrip(),
-            ],
-        )
-    )
-
-    return new_value
+    print(new_value)
+    print("----------")
+    return new_value.rstrip()
