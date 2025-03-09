@@ -63,22 +63,30 @@ def get_random_street_address_line(old_value: str, attributes: dict[str, str] | 
     print(parsed_address)
 
     new_value = ""
-    for  key, value in parsed_address[0].items():
+    for key, value in parsed_address[0].items():
         if key == "AddressNumber":
             digits = len(value)
             new_house_number = _get_random_int(digits)
             new_value += f"{new_house_number} "
         elif key == "StreetNamePreDirectional":
-            new_value += choice(["N", "NE", "E", "SE", "S", "SW", "W", "NW"]) + " "
+            new_direction = choice(["N", "NE", "E", "SE", "S", "SW", "W", "NW"])
+
+            # An obtuse way to perserve periods in the direction. If we find one, we assume it is at
+            # the end, we find two, we assume it is after each direction (do people even write, e.g.
+            # N.E. 1st St?)
+            num_periods = value.count(".")
+            if num_periods == 1:
+                new_direction += "."
+            elif num_periods == 2:
+                new_direction = new_direction[0] + "." + new_direction[1] + "."
+            new_value += f"{new_direction} "
         elif key == "StreetNamePostType":
             new_value += f"{choice(_street_types)} "
         elif key == "StreetName":
             new_value += f"{choice(_street_names)} "
         elif key == "OccupancyIdentifier":
             pattern = re.compile(r"\d")
-            new_occupancy_identifier = pattern.sub(
-                lambda x: str(_get_random_int(1)), value
-            )
+            new_occupancy_identifier = pattern.sub(lambda x: str(_get_random_int(1)), value)
             new_value += f"{new_occupancy_identifier}"
         else:
             new_value += f"{value}"
