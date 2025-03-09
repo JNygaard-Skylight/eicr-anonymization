@@ -57,40 +57,59 @@ def _get_random_int(digits: int):
 
 def get_random_street_address_line(old_value: str, attributes: dict[str, str] | None = None):
     """Get a random Star Wars themed street address."""
-    # Get the number of digits in the house number
+    parsed_address = usaddress.parse(old_value)
+    tagged_address = usaddress.tag(old_value)
     print(old_value)
-    parsed_address = usaddress.tag(old_value)
-    print(parsed_address)
 
-    new_value = ""
-    for key, value in parsed_address[0].items():
+    new_parts: list[str] = []
+    for key, value in tagged_address[0].items():
         if key == "AddressNumber":
             digits = len(value)
             new_house_number = _get_random_int(digits)
-            new_value += f"{new_house_number} "
+            new_parts.append(str(new_house_number))
         elif key == "StreetNamePreDirectional":
             new_direction = choice(["N", "NE", "E", "SE", "S", "SW", "W", "NW"])
-
-            # An obtuse way to perserve periods in the direction. If we find one, we assume it is at
-            # the end, we find two, we assume it is after each direction (do people even write, e.g.
-            # N.E. 1st St?)
             num_periods = value.count(".")
             if num_periods == 1:
                 new_direction += "."
             elif num_periods == 2:
                 new_direction = new_direction[0] + "." + new_direction[1] + "."
-            new_value += f"{new_direction} "
+            new_parts.append(new_direction)
         elif key == "StreetNamePostType":
-            new_value += f"{choice(_street_types)} "
+            new_parts.append(
+                choice(
+                    [
+                        street_type
+                        for street_type in _street_types
+                        if street_type.endswith(".") == value.endswith(".")
+                    ]
+                )
+            )
         elif key == "StreetName":
-            new_value += f"{choice(_street_names)} "
+            new_parts.append(choice(_street_names))
         elif key == "OccupancyIdentifier":
             pattern = re.compile(r"\d")
             new_occupancy_identifier = pattern.sub(lambda x: str(_get_random_int(1)), value)
-            new_value += f"{new_occupancy_identifier}"
+            new_parts.append(new_occupancy_identifier)
         else:
-            new_value += f"{value}"
+            new_parts.append(value)
+
+    new_value = " ".join(new_parts)
+
+    occupancy_identifiers = [key[0] for key in parsed_address if key[1] == "OccupancyIdentifier"]
+    if len(occupancy_identifiers) == 2:
+        first_occ_ident = occupancy_identifiers[0]
+        start_of_occ_ident = old_value.find(first_occ_ident)
+        length_of_occ_ident = len(first_occ_ident)
+        if old_value[start_of_occ_ident + length_of_occ_ident] == " ":
+            pass
+        else:
+            start_of_occ_ident = new_value.find(first_occ_ident)
+            new_value = (
+                new_value[: start_of_occ_ident + length_of_occ_ident]
+                + new_value[start_of_occ_ident + length_of_occ_ident + 1 :]
+            )
 
     print(new_value)
-    print("----------")
-    return new_value.rstrip()
+
+    return new_value

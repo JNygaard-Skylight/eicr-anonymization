@@ -109,3 +109,26 @@ class TestGetRandomStreetAddressLine:
         expected = "3201 Spire Blvd SE."
         actual = get_random_street_address_line(orginal_value)
         assert actual == expected
+
+    def test_unit_number(self):
+        """Test the get_random_street_address_line function for an address with a unit number."""
+        orginal_value = "7820 7th Street SE. #9203"
+        expected = "3201 Spire Blvd SE. #5288"
+        actual = get_random_street_address_line(orginal_value)
+        assert actual == expected
+
+    def test_unit_number_space(self):
+        """Test the get_random_street_address_line function for an address with a unit number."""
+        orginal_value = "7820 7th Street SE. # 9203"
+        expected = "3201 Spire Blvd SE. # 5288"
+        actual = get_random_street_address_line(orginal_value)
+        assert actual == expected
+
+    def test_street_type_period(self):
+        """Test the get_random_street_address_line function for an address with a street type."""
+        orginal_value = "7820 7th St. SE."
+        expected = "3201 Spire Blvd. SE."
+        actual = get_random_street_address_line(orginal_value)
+        assert actual == expected
+
+
