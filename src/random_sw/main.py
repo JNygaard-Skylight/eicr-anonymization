@@ -59,7 +59,6 @@ def get_random_street_address_line(old_value: str, attributes: dict[str, str] | 
     """Get a random Star Wars themed street address."""
     parsed_address = usaddress.parse(old_value)
     tagged_address = usaddress.tag(old_value)
-    print(old_value)
 
     new_parts: list[str] = []
     for key, value in tagged_address[0].items():
@@ -109,7 +108,5 @@ def get_random_street_address_line(old_value: str, attributes: dict[str, str] | 
                 new_value[: start_of_occ_ident + length_of_occ_ident]
                 + new_value[start_of_occ_ident + length_of_occ_ident + 1 :]
             )
-
-    print(new_value)
 
     return new_value

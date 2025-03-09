@@ -16,7 +16,6 @@ from random_sw.main import (
 @pytest.fixture(autouse=True)
 def set_random_seed():
     """Set up a random seed for reproducibility."""
-    print("Setting random seed")
     random.seed(1)
 
 
