@@ -8,6 +8,7 @@ import re
 
 from tabulate import tabulate
 
+from data_cache.main import DataCache
 from random_sw.main import (
     get_random_family_name,
     get_random_given_name,
@@ -65,6 +66,12 @@ def parse_attributes(tag: str) -> dict:
     return dict(re.findall(r'([\w:.-]+)\s*=\s*["\'](.*?)["\']', tag))
 
 
+def normalize_text(text: str, data_cache: dict) -> str:
+    """Normalize text by removing punctuation and converting to lowercase."""
+    text = text.lower().replace(".", "")
+    return text
+
+
 def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
     """Replace sensitive fields in an EICR XML file using regex."""
     sensitive_fields = [
@@ -74,64 +81,62 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
         ("suffix", get_random_name_suffix),
         ("streetAddressLine", get_random_street_address_line),
     ]
-
+    data_caches = {}
     for tag, get_random_value in sensitive_fields:
-        # data_cache = {
-        #     "norm_value": {
-        #         "norm_replacement": "norm_replacement",
-        #         "replacements": [("raw", "replacement")],
-        # }
-        data_cache = {}
+        data_caches[tag] = DataCache()
         pattern = re.compile(
             rf"(<(?:\w+:)?{tag}\b[^>]*>)(.*?)(?:(</(?:\w+:)?{tag}>)|(/>))", re.DOTALL
         )
 
-        def repl(match, *, get_random_value=get_random_value, data_cache=data_cache):
+        def repl(match, *, get_random_value=get_random_value, data_cache=data_caches[tag]):
             open_tag, inner_text, closing_tag, self_close = match.groups()
             if self_close is not None:
                 # Leave self-closing tags unchanged.
                 return match.group(0)
 
-            stripped_inner_text = inner_text.strip()
             attributes = parse_attributes(open_tag)
-            norm = stripped_inner_text.lower()
 
-            # Preserve the original leading/trailing whitespace.
-            leading = inner_text[: len(inner_text) - len(inner_text.lstrip())]
-            trailing = inner_text[len(inner_text.rstrip()) :]
-            if norm in data_cache:
-                new_value = data_cache[norm]["norm_replacement"]
-            else:
-                new_value = get_random_value(stripped_inner_text, attributes)
-                data_cache.setdefault(norm, {})["norm_replacement"] = new_value
+            new_value = data_cache.get(inner_text)
+            if new_value is None:
+                stripped_inner_text = inner_text.strip()
+                base_replacement_value = get_random_value(stripped_inner_text, attributes)
+                new_value = data_cache.set_new(
+                    key=inner_text,
+                    base_replacement_value=base_replacement_value,
+                )
 
-            new_value = leading + new_value + trailing
-            data_cache[norm].setdefault("replacements", []).append((inner_text, new_value))
+            data_cache.set(key=inner_text, replacement_value=new_value)
             return f"{open_tag}{new_value}{closing_tag}"
 
         xml_text, count = pattern.subn(repl, xml_text)
-        print(f"Replaced {count} instances of {len(data_cache)} unique <{tag}> values ")
+        print(f"Replaced {count} instances of {len(data_caches[tag])} unique <{tag}> values ")
 
     if debug:
-        for normalized_value, data in data_cache.items():
-            print(f"Normalized Value:\t`{normalized_value}`")
-            print(f"Norm replacement:\t`{data['norm_replacement']}`")
+        for tag, data_cache in data_caches.items():
+            print(f"Tag: {tag}")
+            for normalized_value, data in data_cache.items():
+                print(f"Normalized Value:\t`{normalized_value}`")
+                print(f"Norm replacement:\t`{data['normized_replacement']}`")
+                print(f"Instances replaced: {len(data['replacements'])}")
+                depublicated_replacements = []
+                added_replacements = set()
+                for replacement in data["replacements"]:
+                    if replacement not in added_replacements:
+                        depublicated_replacements.append(
+                            (f"`{replacement[0]}`", f"`{replacement[1]}`")
+                        )
+                        added_replacements.add(replacement)
+                    else:
+                        continue
 
-            depublicated_replacements = []
-            added_replacements = set()
-            for replacement in data["replacements"]:
-                if replacement not in added_replacements:
-                    depublicated_replacements.append((f"`{replacement[0]}`", f"`{replacement[1]}`"))
-                    added_replacements.add(replacement)
-                else:
-                    continue
-
-            print(
-                tabulate(
-                    depublicated_replacements, headers=["Orginal", "Replacement"], tablefmt="outline"
+                print(
+                    tabulate(
+                        depublicated_replacements,
+                        headers=["Orginal", "Replacement"],
+                        tablefmt="outline",
+                    )
                 )
-            )
-            print()
+                print()
     return xml_text
 
 

@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "defusedxml>=0.7.1",
     "pyyaml>=6.0.2",
+    "rapidfuzz>=3.12.2",
     "tabulate>=0.9.0",
     "tqdm>=4.67.1",
     "usaddress>=0.5.11",
@@ -23,24 +24,24 @@ line-length = 100
 
 [tool.ruff.lint]
 select = [
-  "S",    # Bandit
   "B",    # Bugbear
-  "C4",   # flake8-comprehensions
-  "LOG",  # flake8-logging
-  "G",    # flake8-logging-format
-  "PT",   # flake8-pytest-style
   "B",    # flake8-bugbear
-  "F",    # Pyflakes
-  "E",    # Pydocstyle errors
-  "W",    # Pydocstyle warnings
-  "D",    # Pydocstyle
-  "I",    # isort
-  "UP",   # pyupgrade
-  "SIM",  # flake8-simplify
-  "PL",   # Pylint
-  "FURB", # refurb
-  "RUF",  # Ruff
+  "C4",   # flake8-comprehensions
   "C90",  # mccabe
+  "D",    # Pydocstyle
+  "E",    # Pydocstyle errors
+  "F",    # Pyflakes
+  "FURB", # refurb
+  "G",    # flake8-logging-format
+  "I",    # isort
+  "LOG",  # flake8-logging
+  "PL",   # Pylint
+  "PT",   # flake8-pytest-style
+  "RUF",  # Ruff
+  "S",    # Bandit
+  "SIM",  # flake8-simplify
+  "UP",   # pyupgrade
+  "W",    # Pydocstyle warnings
 ]
 ignore= [
   "S311" # suspicious-non-cryptographic-random-usage
@@ -50,6 +51,3 @@ ignore= [
 "tests/**" = [
   "S101" # assert
 ]
-
-[tool.ruff.format]
-
