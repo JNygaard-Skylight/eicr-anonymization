@@ -1,60 +1,689 @@
-- Alley
-- Ave
-- Ave.
-- Avenue
-- Beltway
-- Blvd
-- Blvd.
-- Boulevard
-- Bypass
-- Causeway
-- Cir
-- Cir.
-- Circle
-- Close
-- Court
-- Crescent
-- Ct
-- Ct.
-- Dr
-- Dr.
-- Drive
-- Expressway
-- Freeway
-- Highway
-- Hwy
-- Hwy.
-- Lane
-- Ln
-- Ln.
-- Loop
-- Lp
-- Lp.
-- Motorway
-- Parkway
-- Pkwy
-- Pkwy.
-- Pl
-- Pl.
-- Place
-- Plaza
-- Promenade
-- Rd
-- Rd.
-- Road
-- Route
-- Row
-- Sq
-- Sq.
-- Square
-- St
-- St.
-- Street
-- Terrace
-- Trail
-- Turnpike
-- Walk
-- Walkway
-- Way
-- Wy
-- Wy.
+- name: Alley
+  abbreviations:
+    - Aly
+- name: Annex
+  abbreviations:
+    - Annx
+    - Anx
+- name: Arcade
+  abbreviations:
+    - Arc
+- name: Avenue
+  abbreviations:
+    - Av
+    - Ave
+    - Avn
+- name: Bayou
+  abbreviations:
+    - Byu
+- name: Beach
+  abbreviations:
+    - Bch
+- name: Bend
+  abbreviations:
+    - Bnd
+- name: Bluff
+  abbreviations:
+    - Blf
+    - Bluf
+- name: Bluffs
+- name: Bottom
+  abbreviations:
+    - Bot
+    - Btm
+    - Bottm
+- name: Boulevard
+  abbreviations:
+    - Blvd
+    - Boul
+    - Boulv
+- name: Branch
+  abbreviations:
+    - Br
+    - Brnch
+- name: Bridge
+  abbreviations:
+    - Brdge
+    - Brg
+- name: Brook
+  abbreviations:
+    - Brk
+- name: Brooks
+  abbreviations:
+    - Brks
+- name: Burg
+  abbreviations:
+    - Bg
+    - Burg
+- name: Burgs
+  abbreviations:
+  - Bgs
+- name: Bypass
+  abbreviations:
+    - Byp
+    - Bypa
+    - Byps
+- name: Camp
+  abbreviations:
+    - Cp
+    - Cmp
+- name: Canyon
+  abbreviations:
+    - Cnyn
+    - Cyn
+- name: Cape
+  abbreviations:
+    - Cpe
+- name: Causeway
+  abbreviations:
+    - Cswy
+- name: Center
+  abbreviations:
+    - Cen
+    - Cent
+    - Centr
+    - Ctr
+- name: Centre
+  abbreviations:
+    - Cen
+    - Cent
+    - Centr
+    - Ctr
+- name: Centers
+  abbreviations:
+    - Ctrs
+- name: Circle
+  abbreviations:
+    - Cir
+    - Circ
+    - Crcl
+    - Crcle
+- name: Circles
+  abbreviations:
+    - Cirs
+- name: Cliff
+  abbreviations:
+    - Clf
+- name: Cliffs
+  abbreviations:
+    - Clfs
+- name: Club
+  abbreviations:
+    - Clb
+- name: Common
+  abbreviations:
+    - Cmn
+- name: Commons
+  abbreviations:
+    - Cmns
+- name: Corner
+  abbreviations:
+    - Cor
+- name: Corners
+  abbreviations:
+    - Cors
+- name: Course
+  abbreviations:
+    - Crse
+- name: Court
+  abbreviations:
+    - Ct
+- name: Courts
+  abbreviations:
+    - Cts
+- name: Cove
+  abbreviations:
+    - Cv
+- name: Coves
+  abbreviations:
+    - Cvs
+- name: Creek
+  abbreviations:
+    - Crk
+- name: Crescent
+  abbreviations:
+    - Cres
+    - Crsnt
+- name: Crest
+  abbreviations:
+    - Crst
+- name: Crossing
+  abbreviations:
+    - Crssng
+    - Xing
+- name: Crossroad
+  abbreviations:
+    - Xrd
+- name: Crossroads
+  abbreviations:
+    - Xrds
+- name: Curve
+  abbreviations:
+    - Curv
+- name: Dale
+  abbreviations:
+    - Dl
+- name: Dam
+  abbreviations:
+    - Dm
+- name: Divide
+  abbreviations:
+    - Div
+    - Dv
+    - Dvd
+- name: Drive
+  abbreviations:
+    - Dr
+    - Driv
+    - Drv
+- names: Drives
+  abbreviations:
+    - Drs
+- name: Estate
+  abbreviations:
+    - est
+- name: Estates
+  abbreviations:
+    - Ests
+- name: Expressway
+  abbreviations:
+    - Exp
+    - Expr
+    - Express
+    - Expw
+    - Expy
+- name: Extension
+  abbreviations:
+    - Ext
+    - Extn
+    - Extnsn
+- name: Extensions
+  abbreviations:
+    - Exts
+- name: Fall
+- name: Falls
+  abbreviations:
+    - Fls
+- name: Ferry
+  abbreviations:
+    - Frry
+    - Fry
+- name: Field
+  abbreviations:
+    - Fld
+- name: Fields
+  abbreviations:
+    - Flds
+- name: Flat
+  abbreviations:
+    - Flt
+- name: Flats
+  abbreviations:
+    - Flts
+- name: Ford
+  abbreviations:
+    - Frd
+- name: Fords
+  abbreviations:
+    - Frds
+- name: Forest
+  abbreviations:
+    - Frst
+- name: Forge
+  abbreviations:
+    - Forg
+    - Frg
+- name: Forges
+  abbreviations:
+    - Frgs
+- name:
+  abbreviations:
+    - Frk
+- name: Fort
+  abbreviations:
+    - Frt
+- name: Freeway
+  abbreviations:
+    - Freewy
+    - Frway
+    - Frwy
+    - Fwy
+- name: Garden
+  abbreviations:
+    - Gardn
+    - Grden
+    - Grdn
+    - Gdn
+- name: Gardens
+  abbreviations:
+    - Gdns
+    - Grdns
+- name: Gateway
+  abbreviations:
+    - Gatewy
+    - Gatway
+    - Gtway
+    - Gtwy
+- name: Glen
+  abbreviations:
+    - Gln
+- name: Glens
+  abbreviations:
+    - Glns
+- name: Green
+  abbreviations:
+    - Grn
+- name: Greens
+  abbreviations:
+    - Grns
+- name: Grove
+  abbreviations:
+    - Grov
+    - Grv
+- name: Groves
+  abbreviations:
+    - Grvs
+- name: Harbor
+  abbreviations:
+    - Harb
+    - Harbr
+    - Hbr
+    - Hrbor
+- name: Harbors
+  abbreviations:
+    - Hbrs
+- name: Haven
+  abbreviations:
+    - Hvn
+- name: Heights
+  abbreviations:
+    - Ht
+- name: Highway
+  abbreviations:
+    - Highwy
+    - Hiway
+    - Hiwy
+    - Hway
+    - Hwy
+- name: Hill
+  abbreviations:
+    - Hl
+- name: Hills
+  abbreviations:
+    - Hls
+- name: Hollow
+  abbreviations:
+    - Hllw
+    - Holw
+    - Holws
+- name: Inlet
+  abbreviations:
+    - Is
+- name: Island
+  abbreviations:
+    - Islnd
+    - Is
+- name: Islands
+  abbreviations:
+    - Islnds
+    - Iss
+- name: Isle
+- name: Junction
+  abbreviations:
+    - Jct
+    - Jction
+    - Jctn
+    - Junctn
+- name: Junctions
+  abbreviations:
+    - Jctns
+    - Jcts
+- name: Key
+  abbreviations:
+    - Ky
+- name: Keys
+  abbreviations:
+    - Kys
+- name: Knoll
+  abbreviations:
+    - Knl
+- name: knolls
+  abbreviations:
+    - Knls
+- name: Lake
+  abbreviations:
+    - Lk
+- name: Lakes
+  abbreviations:
+    - Lks
+- name: Land
+  abbreviations:
+- name: Landing
+  abbreviations:
+    - Lndg
+    - Lndng
+- name: Lane
+  abbreviations:
+    - Ln
+- name: Light
+  abbreviations:
+    - Lght
+    - Lgt
+- name: Lights
+  abbreviations:
+    - Lghts
+- name: Loaf
+  abbreviations:
+    - Lf
+- name: Lock
+  abbreviations:
+    - Lck
+- name: Locks
+  abbreviations:
+    - Lcks
+- name: Lodge
+  abbreviations:
+    - Ldg
+    - Ldge
+    - Lodg
+- name: Loop
+- name: Mall
+- name: Manor
+  abbreviations:
+    - Manr
+- name: Manors
+  abbreviations:
+    - Mnrs
+- name: Meadow
+  abbreviations:
+    - Mdw
+- name: Meadows
+  abbreviations:
+    - Mdws
+- name: Mews
+- name: Mill
+  abbreviations:
+    - Ml
+- name: Mills
+  abbreviations:
+    - Mls
+- name: Mission
+  abbreviations:
+    - Msn
+- name: Motorway
+  abbreviations:
+    - Mtwy
+- name: Mount
+  abbreviations:
+    - Mnt
+    - Mt
+- name: Mountain
+  abbreviations:
+    - Mntain
+    - Mntn
+    - Mtin
+    - Mtn
+- name: Mountains
+  abbreviations:
+    - Mntns
+- name: Neck
+  abbreviations:
+    - Nck
+- name: Orchard
+  abbreviations:
+    - Orch
+    - Orchrd
+- name: Oval
+  abbreviations:
+    - Ovl
+- name: Overpass
+  abbreviations:
+    - Opas
+- name: Park
+  abbreviations:
+    - Prk
+- name: Parks
+  abbreviations:
+    - Park
+- name: Parkway
+  abbreviations:
+    - Parkwy
+    - Pkway
+    - Pkwy
+    - Pky
+- name: Parkways
+  abbreviations:
+    - Pkwys
+    - Pkwy
+- name: Pass
+- name: Passage
+  abbreviations:
+    - Psge
+- name: Path
+- name: Pike
+- name: Pine
+  abbreviations:
+    - Pne
+- name: Pines
+  abbreviations:
+    - Pnes
+- name: Place
+  abbreviations:
+    - Pl
+- name: Plain
+  abbreviations:
+    - Pln
+- name: Plains
+  abbreviations:
+    - PLns
+- name: Plaza
+  abbreviations:
+    - Plz
+- name: Point
+  abbreviations:
+    - Pt
+- name: Points
+  abbreviations:
+    - Pts
+- name: Port
+  abbreviations:
+    - Prt
+- name: Ports
+  abbreviations:
+    - Prts
+- name: Prairie
+  abbreviations:
+    - Pr
+    - Prr
+- name: Radial
+  abbreviations:
+    - Rad
+    - Radl
+- name: Ramp
+- name: Ranch
+- name: Rapid
+  abbreviations:
+    - Rpd
+- name: Rapids
+  abbreviations:
+    - Rpds
+- name: Rest
+  abbreviations:
+    - Rst
+- name: Ridge
+  abbreviations:
+    - Rdgs
+- name: River
+  abbreviations:
+    - Riv
+    - Rvr
+    - Rivr
+- name: Road
+  abbreviations:
+    - Rd
+- name: Roads
+  abbreviations:
+    - Rds
+- name: Route
+  abbreviations:
+    - Rte
+- name: Row
+- name: Rue
+- name: Run
+- name: Shoal
+  abbreviations:
+    - Shl
+- name: Shoals
+  abbreviations:
+    - Shls
+- name: Shore
+  abbreviations:
+    - Shr
+- name: Shores
+  abbreviations:
+    - Shrs
+- name: Skyway
+- name: Spring
+  abbreviations:
+    - Spg
+    - Spng
+    - Sprng
+- name: Springs
+  abbreviations:
+    - Spgs
+    - Spngs
+    - Sprngs
+- name: Spur
+- name: Spurs
+  abbreviations:
+    - Spur
+- name: Sqaure
+  abbreviations:
+    - Sq
+    - Sqr
+    - Sqre
+- name: Squares
+  abbreviations:
+    - Sqrs
+    - Sqs
+- name: Station
+  abbreviations:
+    - Sta
+    - Statn
+    - Stn
+- name: Stravenue
+  abbreviations:
+    - Stra
+    - Strav
+    - Straven
+    - Stravn
+    - Strvnue
+- name: Stream
+  abbreviations:
+    - Strm
+- name: Street
+  abbreviations:
+    Strt
+    St
+    Str
+- name: Streets
+  abbreviations:
+    - Sts
+- name: Summit
+  abbreviations:
+    - Smt
+- name: Terrace
+  abbreviations:
+    - Ter
+    - Terr
+- name: Throughway
+  abbreviations:
+    - Trwy
+- name: Trace
+  abbreviations:
+    - Trce
+- name: Track
+  abbreviations:
+    - Trk
+    - Trks
+- name: Trafficway
+  abbreviations:
+    - Trfy
+- name: Trail
+  abbreviations:
+    - Trl
+    - Trls
+- name: Trailer
+  abbreviations:
+    - Trlr
+    - Trlrs
+- name: Tunnel
+  abbreviations:
+    - Tunl
+    - Tunls
+    - Tunnl
+- name: Turnpike
+  abbreviations:
+    - Trnpk
+    - Turnpk
+    - Tpke
+- name: Underpass
+  abbreviations:
+    - Upas
+- name: Union
+  abbreviations:
+    - Un
+- name: Unions
+  abbreviations:
+    - Uns
+- name: Valley
+  abbreviations:
+    - Vlly
+    - Vly
+- name: Valleys
+  abbreviations:
+    - Vlys
+- name: Viaduct
+  abbreviations:
+    - Vdct
+    - Via
+    - Viadct
+- name: View
+  abbreviations:
+    - Vw
+- name: Views
+  abbreviations:
+    - Vws
+- name: Village
+  abbreviations:
+    - Vill
+    - Villag
+    - Villg
+    - Vlg
+- name: Villages
+  abbreviations:
+    - Vlgs
+- name: Ville
+  abbreviations:
+    - Vl
+- name: Vista
+  abbreviations:
+    - Vis
+    - Vist
+    - Vst
+    - Vsta
+- name: Walk
+- name: Walks
+  abbreviations:
+    - Walk
+- name: Wall
+- name: Way
+  abbreviations:
+    - Wy
+- name: Ways
+- name: Well
+  abbreviations:
+    - Wl
+- name: Wells
+  abbreviations:
+    - Wls

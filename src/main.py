@@ -15,6 +15,7 @@ from random_sw.main import (
     get_random_name_prefix,
     get_random_name_suffix,
     get_random_street_address_line,
+    get_random_street_address_mapping,
 )
 
 logger = logging.getLogger(__name__)
@@ -75,68 +76,65 @@ def normalize_text(text: str, data_cache: dict) -> str:
 def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
     """Replace sensitive fields in an EICR XML file using regex."""
     sensitive_fields = [
-        ("family", get_random_family_name),
-        ("given", get_random_given_name),
-        ("prefix", get_random_name_prefix),
-        ("suffix", get_random_name_suffix),
-        ("streetAddressLine", get_random_street_address_line),
+        "family",
+        "givenprefix",
+        "suffix",
+        "streetAddressLine",
     ]
     data_caches = {}
-    for tag, get_random_value in sensitive_fields:
+    for tag in sensitive_fields:
         data_caches[tag] = DataCache()
         pattern = re.compile(
             rf"(<(?:\w+:)?{tag}\b[^>]*>)(.*?)(?:(</(?:\w+:)?{tag}>)|(/>))", re.DOTALL
         )
+        matches = pattern.findall(xml_text)
+        inner_texts = {match[1] for match in matches if not match[3]}
+        data_caches[tag].add_list(inner_texts)
+        print(
+            f"Replaced {len(matches)} instances of {len(data_caches[tag])} unique <{tag}> values "
+        )
 
-        def repl(match, *, get_random_value=get_random_value, data_cache=data_caches[tag]):
-            open_tag, inner_text, closing_tag, self_close = match.groups()
-            if self_close is not None:
-                # Leave self-closing tags unchanged.
-                return match.group(0)
-
-            attributes = parse_attributes(open_tag)
-
-            new_value = data_cache.get(inner_text)
-            if new_value is None:
-                stripped_inner_text = inner_text.strip()
-                base_replacement_value = get_random_value(stripped_inner_text, attributes)
-                new_value = data_cache.set_new(
-                    key=inner_text,
-                    base_replacement_value=base_replacement_value,
-                )
-
-            data_cache.set(key=inner_text, replacement_value=new_value)
-            return f"{open_tag}{new_value}{closing_tag}"
-
-        xml_text, count = pattern.subn(repl, xml_text)
-        print(f"Replaced {count} instances of {len(data_caches[tag])} unique <{tag}> values ")
-
-    if debug:
-        for tag, data_cache in data_caches.items():
+    for tag, data_cache in data_caches.items():
+        for normalized_value, data in data_cache.items():
             print(f"Tag: {tag}")
-            for normalized_value, data in data_cache.items():
-                print(f"Normalized Value:\t`{normalized_value}`")
-                print(f"Norm replacement:\t`{data['normized_replacement']}`")
-                print(f"Instances replaced: {len(data['replacements'])}")
-                depublicated_replacements = []
-                added_replacements = set()
-                for replacement in data["replacements"]:
-                    if replacement not in added_replacements:
-                        depublicated_replacements.append(
-                            (f"`{replacement[0]}`", f"`{replacement[1]}`")
-                        )
-                        added_replacements.add(replacement)
-                    else:
-                        continue
+            print(f"Normalized Value:\t`{normalized_value}`")
 
-                print(
-                    tabulate(
-                        depublicated_replacements,
-                        headers=["Orginal", "Replacement"],
-                        tablefmt="outline",
-                    )
-                )
-                print()
+            if tag == "streetAddressLine":
+                replacement_mappings = get_random_street_address_mapping(data)
+
+                # Replace the value in the XML text
+                for raw_value, replacement in replacement_mappings.items():
+                    print(f"{raw_value}\t->\t{replacement}")
+                    xml_text = xml_text.replace(raw_value, replacement)
+
+            # get_random_value_mapping(raw_values, tag)
+
+    # if debug:
+    #     for tag, data_cache in data_caches.items():
+    #         print(f"Tag: {tag}")
+    #         for normalized_value, data in data_cache.items():
+    #             print(f"Normalized Value:\t`{normalized_value}`")
+    #             print(f"Norm replacement:\t`{data['normized_replacement']}`")
+    #             print(f"Instances replaced: {len(data['replacements'])}")
+    #             depublicated_replacements = []
+    #             added_replacements = set()
+    #             for replacement in data["replacements"]:
+    #                 if replacement not in added_replacements:
+    #                     depublicated_replacements.append(
+    #                         (f"`{replacement[0]}`", f"`{replacement[1]}`")
+    #                     )
+    #                     added_replacements.add(replacement)
+    #                 else:
+    #                     continue
+
+    #             print(
+    #                 tabulate(
+    #                     depublicated_replacements,
+    #                     headers=["Orginal", "Replacement"],
+    #                     tablefmt="outline",
+    #                 )
+    #             )
+    #             print()
     return xml_text
 
 
