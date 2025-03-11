@@ -111,40 +111,81 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
             f"Replaced {len(matches)} instances of {len(data_caches[tag])} unique <{tag}> values "
         )
 
+    debug_output = []
     for tag, data_cache in data_caches.items():
         for normalized_value, data in data_cache.items():
-            print(f"Tag: {tag}")
-            print(f"Normalized Value:\t`{normalized_value}`")
-
             match tag:
                 case "family":
                     replacement_mappings = get_random_family_name_mapping(data)
                     for raw_value, replacement in replacement_mappings.items():
                         xml_text = xml_text.replace(raw_value, replacement)
-                    print_replacements(replacement_mappings)
+                        debug_output.append(
+                            [
+                                tag,
+                                normalized_value,
+                                raw_value,
+                                replacement,
+                            ]
+                        )
                 case "given":
                     replacement_mappings = get_random_given_name_mapping(data, normalized_value)
                     for raw_value, replacement in replacement_mappings.items():
                         xml_text = xml_text.replace(raw_value, replacement)
-                    print_replacements(replacement_mappings)
+                        debug_output.append(
+                            [
+                                tag,
+                                normalized_value,
+                                raw_value,
+                                replacement,
+                            ]
+                        )
                 case "prefix":
                     replacement_mappings = get_random_name_prefix_mapping(data, normalized_value)
                     for raw_value, replacement in replacement_mappings.items():
                         xml_text = xml_text.replace(raw_value, replacement)
-                    print_replacements(replacement_mappings)
+                        debug_output.append(
+                            [
+                                tag,
+                                normalized_value,
+                                raw_value,
+                                replacement,
+                            ]
+                        )
                 case "suffix":
                     replacement_mappings = get_random_name_suffix_mapping(
                         data, attributes=data_cache.attributes.get(normalized_value)
                     )
                     for raw_value, replacement in replacement_mappings.items():
                         xml_text = xml_text.replace(raw_value, replacement)
-                    print_replacements(replacement_mappings)
+                        debug_output.append(
+                            [
+                                tag,
+                                normalized_value,
+                                raw_value,
+                                replacement,
+                            ]
+                        )
                 case "streetAddressLine":
                     replacement_mappings = get_random_street_address_mapping(data)
                     for raw_value, replacement in replacement_mappings.items():
                         xml_text = xml_text.replace(raw_value, replacement)
-                    print_replacements(replacement_mappings)
-            print("-" * 64)
+                        debug_output.append(
+                            [
+                                tag,
+                                normalized_value,
+                                raw_value,
+                                replacement,
+                            ]
+                        )
+
+    if debug:
+        print(
+            tabulate(
+                debug_output,
+                headers=["Tag", "Normalized Value", "Original", "Replacement"],
+                tablefmt="fancy_outline",
+            )
+        )
     return xml_text
 
 
