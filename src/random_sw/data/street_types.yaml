@@ -1,3 +1,4 @@
+# https://pe.usps.com/text/pub28/28apc_002.htm
 - name: Alley
   abbreviations:
     - Aly
@@ -57,7 +58,7 @@
     - Burg
 - name: Burgs
   abbreviations:
-  - Bgs
+    - Bgs
 - name: Bypass
   abbreviations:
     - Byp
@@ -583,9 +584,9 @@
     - Strm
 - name: Street
   abbreviations:
-    Strt
-    St
-    Str
+    - Strt
+    - St
+    - Str
 - name: Streets
   abbreviations:
     - Sts

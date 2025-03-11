@@ -24,79 +24,18 @@ _numeric_street_names = _read_yaml("src/random_sw/data/numeric_street_names.yaml
 _street_types = _read_yaml("src/random_sw/data/street_types.yaml")
 
 
-def get_leading_trailing_whitespace(value: str) -> tuple[str, str]:
+def _get_leading_trailing_whitespace(value: str) -> tuple[str, str]:
     """Get the leading and trailing whitespace from a string."""
-    leading_whitespace = ""
-    trailing_whitespace = ""
-
-    if value.startswith(" "):
-        leading_whitespace = " "
-    if value.endswith(" "):
-        trailing_whitespace = " "
+    leading_whitespace = value[: -len(value.lstrip())]
+    trailing_whitespace = value[len(value.rstrip()) :]
 
     return leading_whitespace, trailing_whitespace
 
 
-def get_random_family_name_mapping(raw_values: set[str]):
-    """Get a random Star Wars themed family name for the set of simliar names."""
-    # Get the first value in the set
-    mappings = {}
-    replacement = choice(_family_names)
-    for raw_value in raw_values:
-        leading_whitespace, trailing_whitespace = get_leading_trailing_whitespace(raw_value)
-        mappings[raw_value] = (
-            leading_whitespace + _match_case(raw_value, replacement) + trailing_whitespace
-        )
-    return mappings
-
-
-def get_random_given_name_mapping(raw_values: set[str], normalized_value: str):
-    """Get a random Star Wars themed given name."""
-    # Get the first value in the set
-    mappings = {}
-    if len(normalized_value) == 1:
-        replacement = choice(string.ascii_uppercase)
-    else:
-        replacement = choice(_given_names)
-    for raw_value in raw_values:
-
-        leading_whitespace, trailing_whitespace = get_leading_trailing_whitespace(raw_value)
-        mappings[raw_value] = leading_whitespace + replacement + trailing_whitespace
-        return mappings
-
-def get_random_name_prefix_mapping(raw_values: set[str]):
-    """Get a random Star Wars themed name prefix."""
-    mappings = {}
-    replacement = choice(_name_prefixes)
-    for raw_value in raw_values:
-        leading_whitespace, trailing_whitespace = get_leading_trailing_whitespace(raw_value)
-        mappings[raw_value] = (
-            leading_whitespace + _match_case(raw_value, replacement) + trailing_whitespace
-        )
-    return mappings
-
-
-def get_random_name_suffix_mapping(raw_values: set[str], attributes: dict[str, str] | None = None):
-    """Get a random Star Wars themed name suffix."""
-    mappings = {}
-    if attributes and attributes.get("qualifier") == "AC":
-        replacement = choice(
-            [suffix["value"] for suffix in _name_suffixes if suffix.get("qualifier") == "AC"]
-        )
-    else:
-        replacement = choice(_name_suffixes)["value"]
-
-    for raw_value in raw_values:
-        leading_whitespace, trailing_whitespace = get_leading_trailing_whitespace(raw_value)
-        mappings[raw_value] = (
-            leading_whitespace + _match_case(raw_value, replacement) + trailing_whitespace
-        )
-    return mappings
-
-
-def _get_random_int(digits: int):
-    """Get a random integer with the specified number of digits."""
-    return randint(10 ** (digits - 1), 10**digits - 1)
+def _match_whitespace(old_value: str, new_value: str) -> str:
+    """Match the whitespace of the old value to the new value."""
+    leading_whitespace, trailing_whitespace = _get_leading_trailing_whitespace(old_value)
+    return leading_whitespace + new_value + trailing_whitespace
 
 
 def _match_case(value: str, new_value: str):
@@ -105,10 +44,99 @@ def _match_case(value: str, new_value: str):
         return new_value.upper()
     elif value.islower():
         return new_value.lower()
-    elif value.istitle():
-        return new_value.title()
+    # elif value.istitle():
+    #     return new_value.title()
     else:
         return new_value
+
+
+def _match_punctuation(value: str, new_value: str):
+    """Match the punctuation of the old value to the new value."""
+    if value.endswith(".") and not new_value.endswith("."):
+        return new_value + "."
+    else:
+        return new_value
+
+
+def _map_values_to_formatted_replacement(raw_values: str, replacement: str) -> dict[str, str]:
+    """Map raw values to a replacement value and match the whitespace and case."""
+    mappings = {}
+    for raw_value in raw_values:
+        mappings[raw_value] = _match_case(
+            raw_value, _match_whitespace(raw_value, _match_punctuation(raw_value, replacement))
+        )
+    return mappings
+
+
+def get_random_family_name_mapping(raw_values: set[str]):
+    """Get a random Star Wars themed family name for the set of simliar names."""
+    # Get the first value in the set
+    replacement = choice(_family_names)
+    return _map_values_to_formatted_replacement(raw_values, replacement)
+
+
+def get_random_given_name_mapping(raw_values: set[str], normalized_value: str):
+    """Get a random Star Wars themed given name."""
+    # Get the first value in the set
+    if len(normalized_value) == 1:
+        replacement = choice(string.ascii_uppercase)
+    else:
+        replacement = choice(_given_names)
+    return _map_values_to_formatted_replacement(raw_values, replacement)
+
+
+def get_random_name_prefix_mapping(raw_values: set[str]):
+    """Get a random Star Wars themed name prefix."""
+    replacement = choice(_name_prefixes)
+
+    is_abbreviation_list = [True for x in raw_values if x.endswith(".") or len(x) <= 4]
+    num_abbreviations = len([is_abbreviation_list for x in is_abbreviation_list if x])
+    has_full_name = len(is_abbreviation_list) != len(raw_values)
+
+    if has_full_name and num_abbreviations >= 1:
+        # if it is a mix of a full prefix and an abbreviation, we can pick any prefix that is not abbreviation only
+        replacement = choice(
+            [x for x in _name_prefixes if x["abbreviation"] and "abbreviation_only" not in x]
+        )
+        replacement_name = replacement["name"]
+        replacement_abbreviation = replacement["abbreviation"]
+    elif has_full_name:
+        # if it has only full names, we can pick any prefix that is not abbreviation only
+        replacement_name = choice([x for x in _name_prefixes if "abbreviation_only" not in x])[
+            "name"
+        ]
+    else:
+        # if we got here we can assume it is only a single abbreviation
+        replacement_abbreviation = [x["name"] for x in _name_prefixes if "abbreviation_only" in x]
+        for prefix in _name_prefixes:
+            if "abbreviation" in prefix:
+                replacement_abbreviation.append(prefix["abbreviation"])
+        replacement_abbreviation = choice(replacement_abbreviation)
+
+    mappings = {}
+    for raw_value, is_abbreviation in zip_longest(raw_values, is_abbreviation_list):
+        replacement = replacement_abbreviation if is_abbreviation else replacement_name
+        mappings[raw_value] = _match_case(
+            raw_value, _match_whitespace(raw_value, _match_punctuation(raw_value, replacement))
+        )
+    return mappings
+
+
+def get_random_name_suffix_mapping(raw_values: set[str], attributes: dict[str, str] | None = None):
+    """Get a random Star Wars themed name suffix."""
+    if attributes and attributes.get("qualifier") == "AC":
+        replacement = choice(
+            [suffix["value"] for suffix in _name_suffixes if suffix.get("qualifier") == "AC"]
+        )
+    else:
+        replacement = choice(_name_suffixes)["value"]
+
+    return _map_values_to_formatted_replacement(raw_values, replacement)
+
+
+def _get_random_int(digits: int):
+    """Get a random integer with the specified number of digits."""
+    return randint(10 ** (digits - 1), 10**digits - 1)
 
 
 def get_random_street_address_mapping(raw_values: set[str]):

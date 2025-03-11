@@ -108,7 +108,7 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
             data_caches[tag].add(inner_text, attributes)
 
         print(
-            f"Replaced {len(matches)} instances of {len(data_caches[tag])} unique <{tag}> values "
+            f"Found {len(matches)} instances of {len(data_caches[tag])} unique <{tag}> values "
         )
 
     debug_output = []

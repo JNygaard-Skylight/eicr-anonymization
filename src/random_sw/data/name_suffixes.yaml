@@ -1,5 +1,10 @@
+- value: Junior
+- value: Jr
 - value: Jr.
+- value: Senior
+- value: Sr
 - value: Sr.
+- value: I
 - value: II
 - value: III
 - value: IV
@@ -11,17 +16,25 @@
 - value: X
 - value: JD
   qualifier: AC
+- value: J.D.
+  qualifier: AC
 - value: MD
-  qualifier: AC
-- value: DO
-  qualifier: AC
-- value: PharmD
-  qualifier: AC
-- value: DMin
   qualifier: AC
 - value: M.D.
   qualifier: AC
-- value: Ph.D.
+- value: DO
   qualifier: AC
-- value: CMA
+- value: D.O.
+  qualifier: AC
+- value: PharmD
+  qualifier: AC
+- value: Pharm.D.
+  qualifier: AC
+- value: DMin
+  qualifier: AC
+- value: D.Min
+  qualifier: AC
+- value: PhD
+  qualifier: AC
+- value: Ph.D.
   qualifier: AC

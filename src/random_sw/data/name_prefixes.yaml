@@ -1,21 +1,38 @@
-- Adm.
-- Admiral
-- Captain
-- Cpt.
-- Darth
-- Dr.
-- Gen.
-- General
-- Jedi
-- Jedi Knight
-- Jedi Master
-- Junior Lieutenant
-- Lieutenant
-- Lt.
-- Mr.
-- Mrs.
-- Ms.
-- Sen.
-- Senator
-- Senior Lieutenant
-- Sith Lord
+# Normal terms of address
+- name: Mr
+  abbreviation_only: true
+- name: Mrs
+  abbreviation_only: true
+- name: Miss
+  abbreviation_only: true
+- name: Ms
+  abbreviation_only: true
+- name: Mx
+  abbreviation_only: true
+# Military ranks with US equivalent: https://www.defense.gov/resources/insignia/
+- name: Admiral
+  abbreviation: Adm
+- name: Captain
+  abbreviation: Capt
+- name: General
+  abbreviation: Gen
+- name: Lieutenant
+  abbreviations: Lt
+# Other titles with real world equivalents
+- name: Ambassador
+  abbreviation: Amb
+- name: Chancellor
+  abbreviation: Chan
+- name: Doctor
+  abbreviation: Dr
+- name: Senator
+  abbreviation: Sen
+# Star Wars Nonsense
+- name: Darth
+- name: Jedi
+- name: Jedi Knight
+- name: Jedi Master
+- name: Sith Lord
+# Star Wars military ranks with no US equivalent
+- name: Junior Lieutenant
+- name: Senior Lieutenant
