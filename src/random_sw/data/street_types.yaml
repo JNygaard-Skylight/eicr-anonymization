@@ -177,7 +177,7 @@
     - Dr
     - Driv
     - Drv
-- names: Drives
+- name: Drives
   abbreviations:
     - Drs
 - name: Estate
@@ -237,7 +237,7 @@
 - name: Forges
   abbreviations:
     - Frgs
-- name:
+- name: Fork
   abbreviations:
     - Frk
 - name: Fort
@@ -358,7 +358,6 @@
   abbreviations:
     - Lks
 - name: Land
-  abbreviations:
 - name: Landing
   abbreviations:
     - Lndg

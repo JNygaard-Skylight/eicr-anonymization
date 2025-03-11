@@ -168,16 +168,15 @@ def get_random_street_address_mapping(raw_values: set[str]):
     if "StreetName" in tagged_address:
         new_street_name = choice(_street_names)
     if "StreetNamePostType" in tagged_address:
-        # If there is more than one unique street type, we can assume an abbrevations was used.
-        # so pick a type with enough abbrevations.
-        if num_street_types > 2:
-            new_street_type = choice(
-                [
-                    street_type
-                    for street_type in _street_types
-                    if len(street_type.get("abbreviations", [])) > num_street_types - 1
-                ]
-            )
+        # If there is more than one unique street type, we can assume an abbreviations was used.
+        # so pick a type with enough abbreviations.
+        if num_street_types >= 2:
+            possible_street_types = [
+                street_type
+                for street_type in _street_types
+                if len(street_type.get("abbreviations", [])) >= num_street_types - 1
+            ]
+            new_street_type = choice(possible_street_types)
         else:
             new_street_type = choice(_street_types)
     if "OccupancyIdentifier" in tagged_address:
@@ -187,9 +186,10 @@ def get_random_street_address_mapping(raw_values: set[str]):
         )
 
     new_value_mapping = {}
+    used_street_type_name = False
     for raw_value, old_address in zip_longest(raw_values, tagged_addresses):
         parsed_address = usaddress.parse(raw_value)
-        used_street_type_name = False
+
         new_parts = []
         for key, value in old_address.items():
             if key == "AddressNumber":
@@ -210,12 +210,12 @@ def get_random_street_address_mapping(raw_values: set[str]):
             elif key == "StreetNamePostType":
                 old_street_type = old_address["StreetNamePostType"]
                 if old_street_type.endswith("."):
-                    new_street_type_x = choice(new_street_type["abbrevations"]) + "."
+                    new_street_type_x = choice(new_street_type["abbreviations"]) + "."
                 elif not used_street_type_name:
                     new_street_type_x = new_street_type["name"]
                     used_street_type_name = True
                 else:
-                    new_street_type_x = choice(new_street_type["abbrevations"])
+                    new_street_type_x = choice(new_street_type["abbreviations"])
 
                 new_parts.append(_match_case(old_street_type, new_street_type_x))
             elif key == "StreetNamePostDirectional":

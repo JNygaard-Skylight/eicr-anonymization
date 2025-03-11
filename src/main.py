@@ -123,8 +123,8 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
                             [
                                 tag,
                                 normalized_value,
-                                raw_value,
-                                replacement,
+                                f"`{raw_value}`",
+                                f"`{replacement}`",
                             ]
                         )
                 case "given":
@@ -135,8 +135,8 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
                             [
                                 tag,
                                 normalized_value,
-                                raw_value,
-                                replacement,
+                                f"`{raw_value}`",
+                                f"`{replacement}`",
                             ]
                         )
                 case "prefix":
@@ -147,8 +147,8 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
                             [
                                 tag,
                                 normalized_value,
-                                raw_value,
-                                replacement,
+                                f"`{raw_value}`",
+                                f"`{replacement}`",
                             ]
                         )
                 case "suffix":
@@ -161,8 +161,8 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
                             [
                                 tag,
                                 normalized_value,
-                                raw_value,
-                                replacement,
+                                f"`{raw_value}`",
+                                f"`{replacement}`",
                             ]
                         )
                 case "streetAddressLine":
@@ -173,8 +173,8 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
                             [
                                 tag,
                                 normalized_value,
-                                raw_value,
-                                replacement,
+                                f"`{raw_value}`",
+                                f"`{replacement}`",
                             ]
                         )
 

@@ -32,9 +32,13 @@
   qualifier: AC
 - value: DMin
   qualifier: AC
-- value: D.Min
+- value: D.Min.
   qualifier: AC
 - value: PhD
   qualifier: AC
 - value: Ph.D.
+  qualifier: AC
+- value: CMA
+  qualifier: AC
+- value: C.M.A.
   qualifier: AC
