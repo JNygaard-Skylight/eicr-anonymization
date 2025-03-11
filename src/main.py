@@ -10,11 +10,10 @@ from tabulate import tabulate
 
 from data_cache.main import DataCache
 from random_sw.main import (
-    get_random_family_name,
-    get_random_given_name,
-    get_random_name_prefix,
-    get_random_name_suffix,
-    get_random_street_address_line,
+    get_random_family_name_mapping,
+    get_random_given_name_mapping,
+    get_random_name_prefix_mapping,
+    get_random_name_suffix_mapping,
     get_random_street_address_mapping,
 )
 
@@ -73,11 +72,23 @@ def normalize_text(text: str, data_cache: dict) -> str:
     return text
 
 
+def print_replacements(replacement_mappings: dict):
+    """Print debug information for a given tag."""
+    print(
+        tabulate(
+            replacement_mappings.items(),
+            headers=["Orginal", "Replacement"],
+            tablefmt="outline",
+        )
+    )
+
+
 def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
     """Replace sensitive fields in an EICR XML file using regex."""
     sensitive_fields = [
         "family",
-        "givenprefix",
+        "given",
+        "prefix",
         "suffix",
         "streetAddressLine",
     ]
@@ -88,8 +99,14 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
             rf"(<(?:\w+:)?{tag}\b[^>]*>)(.*?)(?:(</(?:\w+:)?{tag}>)|(/>))", re.DOTALL
         )
         matches = pattern.findall(xml_text)
-        inner_texts = {match[1] for match in matches if not match[3]}
-        data_caches[tag].add_list(inner_texts)
+
+        for match in matches:
+            if match[3]:
+                continue
+            attributes = parse_attributes(match[0])
+            inner_text = match[1]
+            data_caches[tag].add(inner_text, attributes)
+
         print(
             f"Replaced {len(matches)} instances of {len(data_caches[tag])} unique <{tag}> values "
         )
@@ -99,42 +116,35 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
             print(f"Tag: {tag}")
             print(f"Normalized Value:\t`{normalized_value}`")
 
-            if tag == "streetAddressLine":
-                replacement_mappings = get_random_street_address_mapping(data)
-
-                # Replace the value in the XML text
-                for raw_value, replacement in replacement_mappings.items():
-                    print(f"{raw_value}\t->\t{replacement}")
-                    xml_text = xml_text.replace(raw_value, replacement)
-
-            # get_random_value_mapping(raw_values, tag)
-
-    # if debug:
-    #     for tag, data_cache in data_caches.items():
-    #         print(f"Tag: {tag}")
-    #         for normalized_value, data in data_cache.items():
-    #             print(f"Normalized Value:\t`{normalized_value}`")
-    #             print(f"Norm replacement:\t`{data['normized_replacement']}`")
-    #             print(f"Instances replaced: {len(data['replacements'])}")
-    #             depublicated_replacements = []
-    #             added_replacements = set()
-    #             for replacement in data["replacements"]:
-    #                 if replacement not in added_replacements:
-    #                     depublicated_replacements.append(
-    #                         (f"`{replacement[0]}`", f"`{replacement[1]}`")
-    #                     )
-    #                     added_replacements.add(replacement)
-    #                 else:
-    #                     continue
-
-    #             print(
-    #                 tabulate(
-    #                     depublicated_replacements,
-    #                     headers=["Orginal", "Replacement"],
-    #                     tablefmt="outline",
-    #                 )
-    #             )
-    #             print()
+            match tag:
+                case "family":
+                    replacement_mappings = get_random_family_name_mapping(data)
+                    for raw_value, replacement in replacement_mappings.items():
+                        xml_text = xml_text.replace(raw_value, replacement)
+                    print_replacements(replacement_mappings)
+                case "given":
+                    replacement_mappings = get_random_given_name_mapping(data, normalized_value)
+                    for raw_value, replacement in replacement_mappings.items():
+                        xml_text = xml_text.replace(raw_value, replacement)
+                    print_replacements(replacement_mappings)
+                case "prefix":
+                    replacement_mappings = get_random_name_prefix_mapping(data, normalized_value)
+                    for raw_value, replacement in replacement_mappings.items():
+                        xml_text = xml_text.replace(raw_value, replacement)
+                    print_replacements(replacement_mappings)
+                case "suffix":
+                    replacement_mappings = get_random_name_suffix_mapping(
+                        data, attributes=data_cache.attributes.get(normalized_value)
+                    )
+                    for raw_value, replacement in replacement_mappings.items():
+                        xml_text = xml_text.replace(raw_value, replacement)
+                    print_replacements(replacement_mappings)
+                case "streetAddressLine":
+                    replacement_mappings = get_random_street_address_mapping(data)
+                    for raw_value, replacement in replacement_mappings.items():
+                        xml_text = xml_text.replace(raw_value, replacement)
+                    print_replacements(replacement_mappings)
+            print("-" * 64)
     return xml_text
 
 
