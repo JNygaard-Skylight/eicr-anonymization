@@ -107,9 +107,7 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
             inner_text = match[1]
             data_caches[tag].add(inner_text, attributes)
 
-        print(
-            f"Found {len(matches)} instances of {len(data_caches[tag])} unique <{tag}> values "
-        )
+        print(f"Found {len(matches)} instances of {len(data_caches[tag])} unique <{tag}> values ")
 
     debug_output = []
     for tag, data_cache in data_caches.items():
@@ -117,66 +115,31 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
             match tag:
                 case "family":
                     replacement_mappings = get_random_family_name_mapping(data)
-                    for raw_value, replacement in replacement_mappings.items():
-                        xml_text = xml_text.replace(raw_value, replacement)
-                        debug_output.append(
-                            [
-                                tag,
-                                normalized_value,
-                                f"`{raw_value}`",
-                                f"`{replacement}`",
-                            ]
-                        )
+                    xml_text, debug_output = replace(
+                        xml_text, tag, debug_output, normalized_value, replacement_mappings
+                    )
                 case "given":
                     replacement_mappings = get_random_given_name_mapping(data, normalized_value)
-                    for raw_value, replacement in replacement_mappings.items():
-                        xml_text = xml_text.replace(raw_value, replacement)
-                        debug_output.append(
-                            [
-                                tag,
-                                normalized_value,
-                                f"`{raw_value}`",
-                                f"`{replacement}`",
-                            ]
-                        )
+                    xml_text, debug_output = replace(
+                        xml_text, tag, debug_output, normalized_value, replacement_mappings
+                    )
                 case "prefix":
                     replacement_mappings = get_random_name_prefix_mapping(data, normalized_value)
-                    for raw_value, replacement in replacement_mappings.items():
-                        xml_text = xml_text.replace(raw_value, replacement)
-                        debug_output.append(
-                            [
-                                tag,
-                                normalized_value,
-                                f"`{raw_value}`",
-                                f"`{replacement}`",
-                            ]
-                        )
+                    xml_text, debug_output = replace(
+                        xml_text, tag, debug_output, normalized_value, replacement_mappings
+                    )
                 case "suffix":
                     replacement_mappings = get_random_name_suffix_mapping(
                         data, attributes=data_cache.attributes.get(normalized_value)
                     )
-                    for raw_value, replacement in replacement_mappings.items():
-                        xml_text = xml_text.replace(raw_value, replacement)
-                        debug_output.append(
-                            [
-                                tag,
-                                normalized_value,
-                                f"`{raw_value}`",
-                                f"`{replacement}`",
-                            ]
-                        )
+                    xml_text, debug_output = replace(
+                        xml_text, tag, debug_output, normalized_value, replacement_mappings
+                    )
                 case "streetAddressLine":
                     replacement_mappings = get_random_street_address_mapping(data)
-                    for raw_value, replacement in replacement_mappings.items():
-                        xml_text = xml_text.replace(raw_value, replacement)
-                        debug_output.append(
-                            [
-                                tag,
-                                normalized_value,
-                                f"`{raw_value}`",
-                                f"`{replacement}`",
-                            ]
-                        )
+                    xml_text, debug_output = replace(
+                        xml_text, tag, debug_output, normalized_value, replacement_mappings
+                    )
 
     if debug:
         print(
@@ -187,6 +150,33 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
             )
         )
     return xml_text
+
+
+def replace(
+    xml_text: str,
+    tag: str,
+    debug_output: list[str, str, str, str],
+    normalized_value: str,
+    replacement_mappings: dict[str, str],
+):
+    """Replace the values in the XML text."""
+    for raw_value, replacement in replacement_mappings.items():
+        pattern = re.compile(rf"(<{tag}\b[^>]*>)({raw_value})(</{tag}>)")
+
+        xml_text = pattern.sub(
+            lambda m, replacement=replacement: f"{m.group(1)}{replacement}{m.group(3)}",
+            xml_text,
+        )
+        debug_output.append(
+            [
+                tag,
+                normalized_value,
+                f"`{raw_value}`",
+                f"`{replacement}`",
+            ]
+        )
+
+    return xml_text, debug_output
 
 
 if __name__ == "__main__":
