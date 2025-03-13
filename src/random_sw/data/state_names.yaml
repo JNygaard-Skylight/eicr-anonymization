@@ -1,0 +1,21 @@
+# States map to Star Wars Galatic Regions
+- name: Deep Core
+  abbreviation: DC
+- name: Core Worlds
+  abbreviation: CW
+- name: The Colonies
+  abbreviation: TC
+- name: Inner Rim
+  abbreviation: IR
+- name: Expansion Region
+  abbreviation: ER
+- name: Mid-Rim
+  abbreviation: MR
+- name: Outer Rim
+  abbreviation: OR
+- name: Wild Space
+  abbreviation: WS
+- name: Unknown Regions
+  abbreviation: UR
+- name: Western Reaches
+  abbreviation: WR

@@ -4,6 +4,7 @@ import random
 import string
 
 import pytest
+from tabulate import tabulate
 
 from random_sw.main import (
     _family_names,
@@ -11,6 +12,7 @@ from random_sw.main import (
     _given_names,
     _map_values_to_formatted_replacement,
     _match_case,
+    _match_punctuation,
     _match_whitespace,
     _name_suffixes,
     _street_types,
@@ -21,27 +23,33 @@ from random_sw.main import (
 )
 
 
-@pytest.fixture(autouse=True)
-def set_random_seed():
-    """Set up a random seed for reproducibility."""
-    random.seed(1)
-
-
 def _normalize(text):
     return text.lower().strip().replace(".", "")
 
 
-def _validate_mapping(orginal_values: set[str], actual: dict[str, str], expected_values: set[str]):
+def _validate_mapping(
+    orginal_values: set[str],
+    actual: dict[str, str],
+    num_normalized_results: int = 1,
+    possible_values: set[str] | None = None,
+):
     """Validate the name mapping."""
     normalized_results = {_normalize(value) for value in actual.values()}
     assert len(actual) == len(orginal_values)
-    assert len(normalized_results) == 1
+    assert len(normalized_results) == num_normalized_results
 
     for orginal, actual_key, actual_value in zip(
         orginal_values, actual.keys(), actual.values(), strict=False
     ):
+        print(
+            tabulate(
+                [[orginal, actual_key, actual_value]],
+                headers=["Original", "Normalized", "Replacement"],
+            )
+        )
         assert orginal == actual_key
-        assert normalized_results <= {_normalize(value) for value in expected_values}
+        if possible_values is not None:
+            assert normalized_results <= {_normalize(value) for value in possible_values}
         assert orginal.islower() == actual_value.islower()
         assert orginal.isupper() == actual_value.isupper()
         assert sum(c.isdigit() for c in orginal) == sum(c.isdigit() for c in actual_value)
@@ -50,9 +58,7 @@ def _validate_mapping(orginal_values: set[str], actual: dict[str, str], expected
         assert period_in_orginal == period_in_actual
 
 
-class TestGetRandomValue:
-    """Tests for the random_sw module."""
-
+class TestUtils:
     @pytest.mark.parametrize(
         ("value", "expected_leading", "expected_trailing"),
         [
@@ -99,6 +105,22 @@ class TestGetRandomValue:
         """Test the _match_case function."""
         assert _match_case(orginal_value, new_value) == expected
 
+    @pytest.mark.parametrize(
+        ("orginal_value", "new_value", "expected"),
+        [
+            ("test", "test", "test"),
+            ("test", "test.", "test"),
+            ("test.", "test", "test."),
+            ("test.", "test.", "test."),
+            ("t.e.s.t.", "test", "test."),
+            ("t.e.s.t.", "test.", "test."),
+        ],
+    )
+    def test_match_punctuation(self, orginal_value, new_value, expected):
+        """Test the _match_punctuation function."""
+        assert _match_punctuation(orginal_value, new_value) == expected
+
+
     def test_map_values_to_formatted_replacement(self):
         """Test the _map_values_to_formatted_replacement function."""
         raw_values = ["test", " test", "test ", " test ", "   test  ", "\ttest\t", "TEST"]
@@ -114,49 +136,82 @@ class TestGetRandomValue:
         }
         assert _map_values_to_formatted_replacement(raw_values, replacement) == expected
 
-    def test_get_random_family_name_mapping(self):
+
+class TestGetRandomValue:
+    """Tests for the random_sw module."""
+
+    @pytest.fixture
+    def set_random_seed(self, request):
+        """Set up a random seed for reproducibility.
+
+        This fixture ensures that the random seed is set to a fixed value for the first iteration of
+        each test function. This ensures that we get deterministic results regardless of the order
+        in which the tests are run.
+        """
+        callspec = getattr(request.node, "callspec", None)
+        repeat_iteration = callspec.params.get("__pytest_repeat_step_number", 0) if callspec else 0
+        if repeat_iteration == 0:
+            random.seed(1)
+
+    @pytest.mark.repeat(4)
+    def test_get_random_family_name_mapping(self, set_random_seed):
         """Test the get_random_family_name_mapping function with multiple values."""
         orginal_values = {"Bloggs"}
 
         actual = get_random_family_name_mapping(orginal_values)
-        _validate_mapping(orginal_values, actual, _family_names)
+        _validate_mapping(orginal_values, actual, possible_values=_family_names)
 
-    def test_get_random_given_name_mapping(self):
+    @pytest.mark.parametrize(
+        ("orginal_values", "normalized_value", "num_normalized_results", "possible_values"),
+        [({"Smith"}, "smith", 1, _given_names), ("T", "t", 1, string.ascii_lowercase)],
+    )
+    @pytest.mark.repeat(7)
+    def test_get_random_given_name_mapping(
+        self,
+        set_random_seed,
+        orginal_values,
+        normalized_value,
+        num_normalized_results,
+        possible_values,
+    ):
         """Test the get_random_given_name_mapping function."""
-        orginal_values = {"Joe"}
-        normalized_value = "joe"
+        actual = get_random_given_name_mapping(
+            orginal_values, normalized_value, num_normalized_results
+        )
+        _validate_mapping(orginal_values, actual, num_normalized_results, possible_values)
 
-        actual = get_random_given_name_mapping(orginal_values, normalized_value)
-        _validate_mapping(orginal_values, actual, _given_names)
-
-    def test_get_random_given_name_mapping_initial(self):
-        """Test the get_random_given_name_mapping function with a single letter."""
-        orginal_values = {"J"}
-        normalized_value = "j"
-
-        actual = get_random_given_name_mapping(orginal_values, normalized_value)
-
-        _validate_mapping(orginal_values, actual, string.ascii_lowercase)
-
-    def test_get_random_name_suffix_mapping(self):
+    @pytest.mark.parametrize(
+        ("orginal_values", "possible_values", "qualifier"),
+        [
+            ({"MD"}, [x["value"] for x in _name_suffixes], None),
+            (
+                {"DO", " DO"},
+                [x["value"] for x in _name_suffixes if "qualifier" in x and x["qualifier"] == "AC"],
+                "AC",
+            ),
+        ],
+    )
+    @pytest.mark.repeat(3)
+    def test_get_random_name_suffix_mapping(self, orginal_values, possible_values, qualifier):
         """Test the get_random_name_suffix_mapping function."""
         # This function is not implemented in the provided code, so we can't test it.
-        orginal_values = {"MD", " MD"}
-        actual = get_random_name_suffix_mapping(orginal_values, attributes={"qualifier": "AC"})
-        expected_values = [
-            x["value"] for x in _name_suffixes if "qualifier" in x and x["qualifier"] == "AC"
-        ]
-        _validate_mapping(orginal_values, actual, expected_values)
+        actual = get_random_name_suffix_mapping(orginal_values, attributes={"qualifier": qualifier})
+        _validate_mapping(orginal_values, actual, possible_values=possible_values)
 
-    def test_get_random_street_address_mapping_simple(self):
-        """Test the get_random_street_address_mapping function."""
-        orginal_values = {"1 Wright Street"}
+    @pytest.mark.parametrize(
+        ("orginal_values", "num_normalized_results"),
+        [
+            ({"1 Wright Street"}, 1),
+            ({"9906 ACHORAGE RTE #8272"}, 1),
+            ({"297 N New Castle Aly", "297 N. New Castle Alley"}, 2),
+        ],
+    )
+    def test_get_random_street_address_mapping(self, orginal_values, num_normalized_results):
         actual = get_random_street_address_mapping(orginal_values)
-        expected_street_types = {_normalize(x["name"]) for x in _street_types}
 
         normalized_results = {_normalize(value) for value in actual.values()}
         assert len(actual) == len(orginal_values)
-        assert len(normalized_results) == 1
+        assert len(normalized_results) == num_normalized_results
 
         for orginal, actual_key, actual_value in zip(
             orginal_values, actual.keys(), actual.values(), strict=False
@@ -168,48 +223,3 @@ class TestGetRandomValue:
             period_in_actual = "." in actual_value
             assert period_in_orginal == period_in_actual
             assert sum(c.isdigit() for c in orginal) == sum(c.isdigit() for c in actual_value)
-
-            assert _normalize(orginal.split()[-1]) in expected_street_types
-
-
-    def test_get_random_street_address_mapping_unit(self):
-        """Test the get_random_street_address_mapping function with unit number."""
-        orginal_values = {"9906 ACHORAGE RTE #8272"}
-        actual = get_random_street_address_mapping(orginal_values)
-        expected_street_types = {_normalize(x["name"]) for x in _street_types}
-
-        normalized_results = {_normalize(value) for value in actual.values()}
-        assert len(actual) == len(orginal_values)
-        assert len(normalized_results) == 1
-
-        for orginal, actual_key, actual_value in zip(
-            orginal_values, actual.keys(), actual.values(), strict=False
-        ):
-            assert orginal == actual_key
-            assert orginal.islower() == actual_value.islower()
-            assert orginal.isupper() == actual_value.isupper()
-            period_in_orginal = "." in orginal
-            period_in_actual = "." in actual_value
-            assert period_in_orginal == period_in_actual
-            assert sum(c.isdigit() for c in orginal) == sum(c.isdigit() for c in actual_value)
-
-    def test_Get_random_street_address_mapping_direction(self):
-        orginal_values = {"297 N New Castle Aly", "297 N. New Castle Alley"}
-        actual = get_random_street_address_mapping(orginal_values)
-
-        normalized_results = {_normalize(value) for value in actual.values()}
-        assert len(actual) == len(orginal_values)
-        assert len(normalized_results) == 2
-
-        for orginal, actual_key, actual_value in zip(
-            orginal_values, actual.keys(), actual.values(), strict=False
-        ):
-            assert orginal == actual_key
-            assert orginal.islower() == actual_value.islower()
-            assert orginal.isupper() == actual_value.isupper()
-            period_in_orginal = "." in orginal
-            period_in_actual = "." in actual_value
-            assert period_in_orginal == period_in_actual
-            assert sum(c.isdigit() for c in orginal) == sum(c.isdigit() for c in actual_value)
-
-

@@ -35,7 +35,7 @@ class DataCache:
             self.attributes[key] = attributes
 
     def get_key(self, input: str) -> str:
-        """Get the normalized key for a given key."""
+        """Get the normalized key for a given key. If it does not exist, create a new key."""
         normalized_input = _normalize(input)
 
         key = None
@@ -44,6 +44,12 @@ class DataCache:
             if score and score[1] > 83:
                 key = score[0]
         else:
+            for word in self.data:
+                if normalized_input in word or  word in normalized_input:
+                    # if the input is a subset of a key, then it is a match
+                    key = word
+                    break
+                key = normalized_input
             key = normalized_input
 
         return key

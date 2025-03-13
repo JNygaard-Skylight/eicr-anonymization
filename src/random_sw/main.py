@@ -52,30 +52,40 @@ def _match_case(value: str, new_value: str):
 
 def _match_punctuation(value: str, new_value: str):
     """Match the punctuation of the old value to the new value."""
-    if value.endswith(".") and not new_value.endswith("."):
+    if "." not in value:
+        return new_value.replace(".", "")
+    elif value.endswith(".") and not new_value.endswith("."):
         return new_value + "."
     else:
         return new_value
+
+
+def _match_formatting(old_value: str, new_value: str) -> str:
+    return _match_case(
+        old_value, _match_whitespace(old_value, _match_punctuation(old_value, new_value))
+    )
 
 
 def _map_values_to_formatted_replacement(raw_values: str, replacement: str) -> dict[str, str]:
     """Map raw values to a replacement value and match the whitespace and case."""
     mappings = {}
     for raw_value in raw_values:
-        mappings[raw_value] = _match_case(
-            raw_value, _match_whitespace(raw_value, _match_punctuation(raw_value, replacement))
-        )
+        mappings[raw_value] = _match_formatting(raw_value, replacement)
     return mappings
 
 
-def get_random_family_name_mapping(raw_values: set[str]):
+def get_random_family_name_mapping(
+    raw_values: set[str], normalized_value: str | None = None, attributes: dict[str, str] | None = None
+):
     """Get a random Star Wars themed family name for the set of simliar names."""
     # Get the first value in the set
     replacement = choice(_family_names)
     return _map_values_to_formatted_replacement(raw_values, replacement)
 
 
-def get_random_given_name_mapping(raw_values: set[str], normalized_value: str):
+def get_random_given_name_mapping(
+    raw_values: set[str], normalized_value: str, attributes: dict[str, str] | None = None
+):
     """Get a random Star Wars themed given name."""
     # Get the first value in the set
     if len(normalized_value) == 1:
@@ -85,7 +95,9 @@ def get_random_given_name_mapping(raw_values: set[str], normalized_value: str):
     return _map_values_to_formatted_replacement(raw_values, replacement)
 
 
-def get_random_name_prefix_mapping(raw_values: set[str]):
+def get_random_name_prefix_mapping(
+    raw_values: set[str], normalized_value: str, attributes: dict[str, str] | None = None
+):
     """Get a random Star Wars themed name prefix."""
     replacement = choice(_name_prefixes)
 
@@ -122,7 +134,9 @@ def get_random_name_prefix_mapping(raw_values: set[str]):
     return mappings
 
 
-def get_random_name_suffix_mapping(raw_values: set[str], attributes: dict[str, str] | None = None):
+def get_random_name_suffix_mapping(
+    raw_values: set[str], normalized_value: str | None = None, attributes: dict[str, str] | None = None
+):
     """Get a random Star Wars themed name suffix."""
     if attributes and attributes.get("qualifier") == "AC":
         replacement = choice(
@@ -139,7 +153,9 @@ def _get_random_int(digits: int):
     return randint(10 ** (digits - 1), 10**digits - 1)
 
 
-def get_random_street_address_mapping(raw_values: set[str]):
+def get_random_street_address_mapping(
+    raw_values: set[str], normalized_value: str | None = None, attributes: dict[str, str] | None = None
+):
     """Get a random Star Wars themed street address. for the set of simliar addresses.
 
     I want to do something like this:
@@ -250,3 +266,48 @@ def get_random_street_address_mapping(raw_values: set[str]):
 
         new_value_mapping[raw_value] = new_value
     return new_value_mapping
+
+
+def get_random_city_mapping(
+    raw_values: set[str], normalized_value: str, attributes: dict[str, str] | None = None
+):
+    """Get a random Star Wars themed city name for the set of simliar city names."""
+    replacement = choice(_read_yaml("src/random_sw/data/city_names.yaml"))
+    return _map_values_to_formatted_replacement(raw_values, replacement)
+
+
+def get_random_county_mapping(
+    raw_values: set[str], normalized_value: str, attributes: dict[str, str] | None = None
+):
+    """Get a random Star Wars themed county name for the set of simliar county names."""
+    replacement = choice(_read_yaml("src/random_sw/data/county_names.yaml"))
+    return _map_values_to_formatted_replacement(raw_values, replacement)
+
+
+def get_random_state_mapping(
+    raw_values: set[str], normalized_value: str, attributes: dict[str, str] | None = None
+):
+    """Get a random Star Wars themed state name for the set of simliar state names."""
+    replacement = choice(_read_yaml("src/random_sw/data/state_names.yaml"))["abbreviation"]
+    return _map_values_to_formatted_replacement(raw_values, replacement)
+
+
+def get_random_country_mapping(
+    raw_values: set[str], normalized_value: str, attributes: dict[str, str] | None = None
+):
+    """Get a random Star Wars themed country name for the set of simliar country names."""
+    replacement = choice(_read_yaml("src/random_sw/data/country_names.yaml"))
+    return _map_values_to_formatted_replacement(raw_values, replacement)
+
+
+def get_random_postal_code_mapping(
+    raw_values: set[str], normalized_value: str, attributes: dict[str, str] | None = None
+):
+    """Get a random Star Wars themed postal code for the set of simliar postal codes."""
+    # replace all digits with a random digit
+    replacement = re.sub(r"\d", lambda x: str(_get_random_int(1)), normalized_value)
+    # replace all lowealphabetic characters with a random lowercase letter
+    replacement = re.sub(r"[a-z]", lambda x: choice(string.ascii_lowercase), replacement)
+    # replace all uppercase alphabetic characters with a random uppercase letter
+    replacement = re.sub(r"[A-Z]", lambda x: choice(string.ascii_uppercase), replacement)
+    return _map_values_to_formatted_replacement(raw_values, replacement)

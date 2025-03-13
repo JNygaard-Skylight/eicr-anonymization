@@ -10,10 +10,15 @@ from tabulate import tabulate
 
 from data_cache.main import DataCache
 from random_sw.main import (
+    get_random_city_mapping,
+    get_random_country_mapping,
+    get_random_county_mapping,
     get_random_family_name_mapping,
     get_random_given_name_mapping,
     get_random_name_prefix_mapping,
     get_random_name_suffix_mapping,
+    get_random_postal_code_mapping,
+    get_random_state_mapping,
     get_random_street_address_mapping,
 )
 
@@ -85,13 +90,19 @@ def print_replacements(replacement_mappings: dict):
 
 def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
     """Replace sensitive fields in an EICR XML file using regex."""
-    sensitive_fields = [
-        "family",
-        "given",
-        "prefix",
-        "suffix",
-        "streetAddressLine",
-    ]
+    sensitive_fields = {
+        "family": get_random_family_name_mapping,
+        "given": get_random_given_name_mapping,
+        "prefix": get_random_name_prefix_mapping,
+        "suffix": get_random_name_suffix_mapping,
+        "streetAddressLine": get_random_street_address_mapping,
+        "city": get_random_city_mapping,
+        "county": get_random_county_mapping,
+        "state": get_random_state_mapping,
+        "country": get_random_country_mapping,
+        "postalCode": get_random_postal_code_mapping,
+    }
+
     data_caches = {}
     for tag in sensitive_fields:
         data_caches[tag] = DataCache()
@@ -112,35 +123,15 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
     debug_output = []
     for tag, data_cache in data_caches.items():
         for normalized_value, data in data_cache.items():
-            match tag:
-                case "family":
-                    replacement_mappings = get_random_family_name_mapping(data)
-                    xml_text, debug_output = replace(
-                        xml_text, tag, debug_output, normalized_value, replacement_mappings
-                    )
-                case "given":
-                    replacement_mappings = get_random_given_name_mapping(data, normalized_value)
-                    xml_text, debug_output = replace(
-                        xml_text, tag, debug_output, normalized_value, replacement_mappings
-                    )
-                case "prefix":
-                    replacement_mappings = get_random_name_prefix_mapping(data, normalized_value)
-                    xml_text, debug_output = replace(
-                        xml_text, tag, debug_output, normalized_value, replacement_mappings
-                    )
-                case "suffix":
-                    replacement_mappings = get_random_name_suffix_mapping(
-                        data, attributes=data_cache.attributes.get(normalized_value)
-                    )
-                    xml_text, debug_output = replace(
-                        xml_text, tag, debug_output, normalized_value, replacement_mappings
-                    )
-                case "streetAddressLine":
-                    replacement_mappings = get_random_street_address_mapping(data)
-                    xml_text, debug_output = replace(
-                        xml_text, tag, debug_output, normalized_value, replacement_mappings
-                    )
-
+            xml_text, tag_debug_output = replace(
+                xml_text,
+                tag,
+                normalized_value,
+                data,
+                data_cache.attributes.get(normalized_value),
+                sensitive_fields[tag],
+            )
+            debug_output.extend(tag_debug_output)
     if debug:
         print(
             tabulate(
@@ -155,11 +146,14 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
 def replace(
     xml_text: str,
     tag: str,
-    debug_output: list[str, str, str, str],
     normalized_value: str,
-    replacement_mappings: dict[str, str],
+    data: set[str],
+    attributes: dict | None,
+    get_random_data_mapping: callable,
 ):
     """Replace the values in the XML text."""
+    debug_output = []
+    replacement_mappings = get_random_data_mapping(data, normalized_value, attributes)
     for raw_value, replacement in replacement_mappings.items():
         pattern = re.compile(rf"(<{tag}\b[^>]*>)({raw_value})(</{tag}>)")
 
