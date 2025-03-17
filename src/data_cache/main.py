@@ -32,34 +32,38 @@ class NormalizedEntry:
         self.values = values
         self.attributes = attributes
 
+    def add(self, value: str):
+        """Add a value to the normalized entry."""
+        self.values.add(value)
+
 
 class TagCache:
     """A tag cache in the data cache."""
 
-    _cache: dict[str, NormalizedEntry] = {}
+    _tag_cache: dict[str, NormalizedEntry] = {}
     tag: str
 
     def __init__(self, tag: str, values: set[str], attributes: dict[str, str] | None):
         """Initialize the tag cache."""
         self.tag = tag
+        self._tag_cache = {}
         self._add_new_key(values, attributes)
 
     def __getitem__(self, key: str) -> set[str]:
         """Get the item in the tag cache."""
-        something = self._cache[self.get_key(key)]
-        return self._cache[self.get_key(key)].values
+        return self._tag_cache[self.get_key(key)].values
 
     def __len__(self) -> int:
         """Get the length of the tag cache."""
-        return len(self._cache)
+        return len(self._tag_cache)
 
     def get_key(self, input: str) -> str:
         """Get the normalized key for a given key. If it does not exist, create a new key."""
         normalized_input = _normalize(input)
 
         key = None
-        if normalized_input not in self._cache:
-            score = process.extractOne(normalized_input, self._cache.keys(), scorer=fuzz.ratio)
+        if normalized_input not in self._tag_cache:
+            score = process.extractOne(normalized_input, self._tag_cache.keys(), scorer=fuzz.ratio)
             if score and score[1] > 83:
                 key = score[0]
         else:
@@ -69,11 +73,11 @@ class TagCache:
 
     def add_attributes(self, key: str, attributes: list[dict[str, str]]):
         """Add an attribute to an existing item in the cache."""
-        self._cache[key].attributes = attributes
+        self._tag_cache[key].attributes = attributes
 
     def _add_new_key(self, raw_value: str, attributes: dict[str, str] | None = None):
         """Add a new item to the cache."""
-        self._cache[_normalize(raw_value)] = NormalizedEntry({raw_value}, attributes)
+        self._tag_cache[_normalize(raw_value)] = NormalizedEntry({raw_value}, attributes)
 
     def add(self, raw_value: str, attributes: dict[str, str] | None = None):
         """Add to an existing item in the cache."""
@@ -81,7 +85,7 @@ class TagCache:
         if key is None:
             self._add_new_key(raw_value)
         else:
-            self._cache[key].add(raw_value)
+            self._tag_cache[key].add(raw_value)
 
         if attributes is not None:
             self.add_attributes(key, attributes)

@@ -26,8 +26,8 @@ class TestDataCache:
         tag = "test_tag"
         test_string = "test"
         data_cache = DataCache()
-        data_cache.add(tag,test_string)
-        data_cache.add(tag,test_string)
+        data_cache.add(tag, test_string)
+        data_cache.add(tag, test_string)
         assert len(data_cache) == 1
         assert len(data_cache[tag]) == 1
         assert len(data_cache[tag][test_string]) == 1
@@ -52,7 +52,6 @@ class TestDataCache:
         assert len(data_cache[tag]) == 1
         assert len(data_cache[tag]["123 1st Street"]) == 2
 
-
     def test_add_2_not_similiar(self):
         """Test the DataCache class. When two values are not simliar they should not be grouped."""
         tag = "test_tag"
@@ -62,28 +61,6 @@ class TestDataCache:
         assert len(data_cache) == 1
         assert len(data_cache[tag]["123 1st Street"]) == 1
         assert len(data_cache[tag]["123 2nd Street"]) == 1
-
-    def test_add_list_same(self):
-        """Test the DataCache class. When two values are not simliar they should not be grouped."""
-        data_cache = DataCache()
-        data_cache.add_list(["123 1st Street", "123 1st Street"])
-        assert len(data_cache) == 1
-        assert len(data_cache["123 1st Street"]) == 1
-
-    def test_add_list_similiar(self):
-        """Test the DataCache class. When two values are simliar they should be grouped."""
-        data_cache = DataCache()
-        data_cache.add_list(["123 1st Street", "123 1st St"])
-        assert len(data_cache) == 1
-        assert len(data_cache["123 1st Street"]) == 2
-
-    def test_add_list_not_similiar(self):
-        """Test the DataCache class. When two values are not simliar they should not be grouped."""
-        data_cache = DataCache()
-        data_cache.add_list(["123 1st Street", "123 2nd Street"])
-        assert len(data_cache) == 2
-        assert len(data_cache["123 1st Street"]) == 1
-        assert len(data_cache["123 2nd Street"]) == 1
 
     def test_zip_4_5(self):
         """Test the DataCache class. When two values are not simliar they should not be grouped."""
