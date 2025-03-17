@@ -103,6 +103,19 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
         "postalCode": get_random_postal_code_mapping,
     }
 
+    extended_sensitive_fields = [
+        ("family", is_same_family_name, get_random_family_name_mapping),
+        ("given", is_same_given_name, get_random_given_name_mapping),
+        ("prefix", is_same_name_prefix, get_random_name_prefix_mapping),
+        ("suffix", is_same_name_suffix, get_random_name_suffix_mapping),
+        ("streetAddressLine", is_same_street_address, get_random_street_address_mapping),
+        ("city", is_same_city, get_random_city_mapping),
+        ("county", is_same_county, get_random_county_mapping),
+        ("state", is_same_state, get_random_state_mapping),
+        ("country", is_same_country, get_random_country_mapping),
+        ("postalCode", is_same_postal_code, get_random_postal_code_mapping),
+    ]
+
     data_caches = {}
     for tag in sensitive_fields:
         data_caches[tag] = DataCache()

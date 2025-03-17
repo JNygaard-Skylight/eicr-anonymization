@@ -304,10 +304,37 @@ def get_random_postal_code_mapping(
     raw_values: set[str], normalized_value: str, attributes: dict[str, str] | None = None
 ):
     """Get a random Star Wars themed postal code for the set of simliar postal codes."""
-    # replace all digits with a random digit
-    replacement = re.sub(r"\d", lambda x: str(_get_random_int(1)), normalized_value)
-    # replace all lowealphabetic characters with a random lowercase letter
-    replacement = re.sub(r"[a-z]", lambda x: choice(string.ascii_lowercase), replacement)
-    # replace all uppercase alphabetic characters with a random uppercase letter
-    replacement = re.sub(r"[A-Z]", lambda x: choice(string.ascii_uppercase), replacement)
-    return _map_values_to_formatted_replacement(raw_values, replacement)
+    all_parts = set()
+    mappings_1 = {}
+    for raw_value in raw_values:
+        parts = re.split(r"\s|-", raw_value)
+        mappings_1[raw_value] = parts
+        all_parts.update(parts)
+
+    mappings = {}
+    for parts in all_parts:
+        # replace all digits with a random digit
+        replacement = re.sub(r"\d", lambda x: str(randint(0, 9)), normalized_value)
+        # replace all lowealphabetic characters with a random lowercase letter
+        replacement = re.sub(r"[a-z]",lambda x: choice(string.ascii_lowercase), replacement)
+        # replace all uppercase alphabetic characters with a random uppercase letter
+        replacement = re.sub(r"[A-Z]",lambda x: choice(string.ascii_lowercase), replacement)
+        mappings[parts] = replacement
+
+    # Rebuild the original values with the new parts
+    for mappings_1_key, mappings_1_value in mappings_1.items():
+        new_parts = []
+        for part in mappings_1_value:
+            if part in mappings:
+                new_parts.append(mappings[part])
+            else:
+                new_parts.append(part)
+        if " " in mappings_1_key:
+            new_value = " ".join(new_parts)
+        elif "-" in mappings_1_key:
+            new_value = "-".join(new_parts)
+        else:
+            new_value = "".join(new_parts)
+        mappings_1[mappings_1_key] = _match_formatting(mappings_1_key, new_value)
+    return mappings
+

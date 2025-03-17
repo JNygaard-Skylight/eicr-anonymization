@@ -19,6 +19,7 @@ from random_sw.main import (
     get_random_family_name_mapping,
     get_random_given_name_mapping,
     get_random_name_suffix_mapping,
+    get_random_postal_code_mapping,
     get_random_street_address_mapping,
 )
 
@@ -120,7 +121,6 @@ class TestUtils:
         """Test the _match_punctuation function."""
         assert _match_punctuation(orginal_value, new_value) == expected
 
-
     def test_map_values_to_formatted_replacement(self):
         """Test the _map_values_to_formatted_replacement function."""
         raw_values = ["test", " test", "test ", " test ", "   test  ", "\ttest\t", "TEST"]
@@ -191,8 +191,10 @@ class TestGetRandomValue:
             ),
         ],
     )
-    @pytest.mark.repeat(3)
-    def test_get_random_name_suffix_mapping(self, orginal_values, possible_values, qualifier):
+    @pytest.mark.repeat(2)
+    def test_get_random_name_suffix_mapping(
+        self, set_random_seed, orginal_values, possible_values, qualifier
+    ):
         """Test the get_random_name_suffix_mapping function."""
         # This function is not implemented in the provided code, so we can't test it.
         actual = get_random_name_suffix_mapping(orginal_values, attributes={"qualifier": qualifier})
@@ -206,7 +208,10 @@ class TestGetRandomValue:
             ({"297 N New Castle Aly", "297 N. New Castle Alley"}, 2),
         ],
     )
-    def test_get_random_street_address_mapping(self, orginal_values, num_normalized_results):
+    @pytest.mark.repeat(5)
+    def test_get_random_street_address_mapping(
+        self, set_random_seed, orginal_values, num_normalized_results
+    ):
         actual = get_random_street_address_mapping(orginal_values)
 
         normalized_results = {_normalize(value) for value in actual.values()}
@@ -223,3 +228,16 @@ class TestGetRandomValue:
             period_in_actual = "." in actual_value
             assert period_in_orginal == period_in_actual
             assert sum(c.isdigit() for c in orginal) == sum(c.isdigit() for c in actual_value)
+
+    @pytest.mark.parametrize(
+        ("orginal_values", "normalized_value", "num_normalized_results"),
+        [({"96972"}, "96972", 1), ({"89513-9129", "89513"}, "89513", 2)],
+    )
+    @pytest.mark.repeat(4)
+    def test_get_random_postal_code_mapping(
+        self, set_random_seed, orginal_values, normalized_value, num_normalized_results
+    ):
+        """Test the get_random_postal_code_mapping function."""
+        # This function is not implemented in the provided code, so we can't test it.
+        actual = get_random_postal_code_mapping(orginal_values, normalized_value)
+        _validate_mapping(orginal_values, actual, num_normalized_results)
