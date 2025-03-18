@@ -1,689 +1,689 @@
 # https://pe.usps.com/text/pub28/28apc_002.htm
-- name: Alley
+- value: Alley
   abbreviations:
     - Aly
-- name: Annex
+- value: Annex
   abbreviations:
     - Annx
     - Anx
-- name: Arcade
+- value: Arcade
   abbreviations:
     - Arc
-- name: Avenue
+- value: Avenue
   abbreviations:
     - Av
     - Ave
     - Avn
-- name: Bayou
+- value: Bayou
   abbreviations:
     - Byu
-- name: Beach
+- value: Beach
   abbreviations:
     - Bch
-- name: Bend
+- value: Bend
   abbreviations:
     - Bnd
-- name: Bluff
+- value: Bluff
   abbreviations:
     - Blf
     - Bluf
-- name: Bluffs
-- name: Bottom
+- value: Bluffs
+- value: Bottom
   abbreviations:
     - Bot
     - Btm
     - Bottm
-- name: Boulevard
+- value: Boulevard
   abbreviations:
     - Blvd
     - Boul
     - Boulv
-- name: Branch
+- value: Branch
   abbreviations:
     - Br
     - Brnch
-- name: Bridge
+- value: Bridge
   abbreviations:
     - Brdge
     - Brg
-- name: Brook
+- value: Brook
   abbreviations:
     - Brk
-- name: Brooks
+- value: Brooks
   abbreviations:
     - Brks
-- name: Burg
+- value: Burg
   abbreviations:
     - Bg
     - Burg
-- name: Burgs
+- value: Burgs
   abbreviations:
     - Bgs
-- name: Bypass
+- value: Bypass
   abbreviations:
     - Byp
     - Bypa
     - Byps
-- name: Camp
+- value: Camp
   abbreviations:
     - Cp
     - Cmp
-- name: Canyon
+- value: Canyon
   abbreviations:
     - Cnyn
     - Cyn
-- name: Cape
+- value: Cape
   abbreviations:
     - Cpe
-- name: Causeway
+- value: Causeway
   abbreviations:
     - Cswy
-- name: Center
+- value: Center
   abbreviations:
     - Cen
     - Cent
     - Centr
     - Ctr
-- name: Centre
+- value: Centre
   abbreviations:
     - Cen
     - Cent
     - Centr
     - Ctr
-- name: Centers
+- value: Centers
   abbreviations:
     - Ctrs
-- name: Circle
+- value: Circle
   abbreviations:
     - Cir
     - Circ
     - Crcl
     - Crcle
-- name: Circles
+- value: Circles
   abbreviations:
     - Cirs
-- name: Cliff
+- value: Cliff
   abbreviations:
     - Clf
-- name: Cliffs
+- value: Cliffs
   abbreviations:
     - Clfs
-- name: Club
+- value: Club
   abbreviations:
     - Clb
-- name: Common
+- value: Common
   abbreviations:
     - Cmn
-- name: Commons
+- value: Commons
   abbreviations:
     - Cmns
-- name: Corner
+- value: Corner
   abbreviations:
     - Cor
-- name: Corners
+- value: Corners
   abbreviations:
     - Cors
-- name: Course
+- value: Course
   abbreviations:
     - Crse
-- name: Court
+- value: Court
   abbreviations:
     - Ct
-- name: Courts
+- value: Courts
   abbreviations:
     - Cts
-- name: Cove
+- value: Cove
   abbreviations:
     - Cv
-- name: Coves
+- value: Coves
   abbreviations:
     - Cvs
-- name: Creek
+- value: Creek
   abbreviations:
     - Crk
-- name: Crescent
+- value: Crescent
   abbreviations:
     - Cres
     - Crsnt
-- name: Crest
+- value: Crest
   abbreviations:
     - Crst
-- name: Crossing
+- value: Crossing
   abbreviations:
     - Crssng
     - Xing
-- name: Crossroad
+- value: Crossroad
   abbreviations:
     - Xrd
-- name: Crossroads
+- value: Crossroads
   abbreviations:
     - Xrds
-- name: Curve
+- value: Curve
   abbreviations:
     - Curv
-- name: Dale
+- value: Dale
   abbreviations:
     - Dl
-- name: Dam
+- value: Dam
   abbreviations:
     - Dm
-- name: Divide
+- value: Divide
   abbreviations:
     - Div
     - Dv
     - Dvd
-- name: Drive
+- value: Drive
   abbreviations:
     - Dr
     - Driv
     - Drv
-- name: Drives
+- value: Drives
   abbreviations:
     - Drs
-- name: Estate
+- value: Estate
   abbreviations:
     - est
-- name: Estates
+- value: Estates
   abbreviations:
     - Ests
-- name: Expressway
+- value: Expressway
   abbreviations:
     - Exp
     - Expr
     - Express
     - Expw
     - Expy
-- name: Extension
+- value: Extension
   abbreviations:
     - Ext
     - Extn
     - Extnsn
-- name: Extensions
+- value: Extensions
   abbreviations:
     - Exts
-- name: Fall
-- name: Falls
+- value: Fall
+- value: Falls
   abbreviations:
     - Fls
-- name: Ferry
+- value: Ferry
   abbreviations:
     - Frry
     - Fry
-- name: Field
+- value: Field
   abbreviations:
     - Fld
-- name: Fields
+- value: Fields
   abbreviations:
     - Flds
-- name: Flat
+- value: Flat
   abbreviations:
     - Flt
-- name: Flats
+- value: Flats
   abbreviations:
     - Flts
-- name: Ford
+- value: Ford
   abbreviations:
     - Frd
-- name: Fords
+- value: Fords
   abbreviations:
     - Frds
-- name: Forest
+- value: Forest
   abbreviations:
     - Frst
-- name: Forge
+- value: Forge
   abbreviations:
     - Forg
     - Frg
-- name: Forges
+- value: Forges
   abbreviations:
     - Frgs
-- name: Fork
+- value: Fork
   abbreviations:
     - Frk
-- name: Fort
+- value: Fort
   abbreviations:
     - Frt
-- name: Freeway
+- value: Freeway
   abbreviations:
     - Freewy
     - Frway
     - Frwy
     - Fwy
-- name: Garden
+- value: Garden
   abbreviations:
     - Gardn
     - Grden
     - Grdn
     - Gdn
-- name: Gardens
+- value: Gardens
   abbreviations:
     - Gdns
     - Grdns
-- name: Gateway
+- value: Gateway
   abbreviations:
     - Gatewy
     - Gatway
     - Gtway
     - Gtwy
-- name: Glen
+- value: Glen
   abbreviations:
     - Gln
-- name: Glens
+- value: Glens
   abbreviations:
     - Glns
-- name: Green
+- value: Green
   abbreviations:
     - Grn
-- name: Greens
+- value: Greens
   abbreviations:
     - Grns
-- name: Grove
+- value: Grove
   abbreviations:
     - Grov
     - Grv
-- name: Groves
+- value: Groves
   abbreviations:
     - Grvs
-- name: Harbor
+- value: Harbor
   abbreviations:
     - Harb
     - Harbr
     - Hbr
     - Hrbor
-- name: Harbors
+- value: Harbors
   abbreviations:
     - Hbrs
-- name: Haven
+- value: Haven
   abbreviations:
     - Hvn
-- name: Heights
+- value: Heights
   abbreviations:
     - Ht
-- name: Highway
+- value: Highway
   abbreviations:
     - Highwy
     - Hiway
     - Hiwy
     - Hway
     - Hwy
-- name: Hill
+- value: Hill
   abbreviations:
     - Hl
-- name: Hills
+- value: Hills
   abbreviations:
     - Hls
-- name: Hollow
+- value: Hollow
   abbreviations:
     - Hllw
     - Holw
     - Holws
-- name: Inlet
+- value: Inlet
   abbreviations:
     - Is
-- name: Island
+- value: Island
   abbreviations:
     - Islnd
     - Is
-- name: Islands
+- value: Islands
   abbreviations:
     - Islnds
     - Iss
-- name: Isle
-- name: Junction
+- value: Isle
+- value: Junction
   abbreviations:
     - Jct
     - Jction
     - Jctn
     - Junctn
-- name: Junctions
+- value: Junctions
   abbreviations:
     - Jctns
     - Jcts
-- name: Key
+- value: Key
   abbreviations:
     - Ky
-- name: Keys
+- value: Keys
   abbreviations:
     - Kys
-- name: Knoll
+- value: Knoll
   abbreviations:
     - Knl
-- name: knolls
+- value: knolls
   abbreviations:
     - Knls
-- name: Lake
+- value: Lake
   abbreviations:
     - Lk
-- name: Lakes
+- value: Lakes
   abbreviations:
     - Lks
-- name: Land
-- name: Landing
+- value: Land
+- value: Landing
   abbreviations:
     - Lndg
     - Lndng
-- name: Lane
+- value: Lane
   abbreviations:
     - Ln
-- name: Light
+- value: Light
   abbreviations:
     - Lght
     - Lgt
-- name: Lights
+- value: Lights
   abbreviations:
     - Lghts
-- name: Loaf
+- value: Loaf
   abbreviations:
     - Lf
-- name: Lock
+- value: Lock
   abbreviations:
     - Lck
-- name: Locks
+- value: Locks
   abbreviations:
     - Lcks
-- name: Lodge
+- value: Lodge
   abbreviations:
     - Ldg
     - Ldge
     - Lodg
-- name: Loop
-- name: Mall
-- name: Manor
+- value: Loop
+- value: Mall
+- value: Manor
   abbreviations:
     - Manr
-- name: Manors
+- value: Manors
   abbreviations:
     - Mnrs
-- name: Meadow
+- value: Meadow
   abbreviations:
     - Mdw
-- name: Meadows
+- value: Meadows
   abbreviations:
     - Mdws
-- name: Mews
-- name: Mill
+- value: Mews
+- value: Mill
   abbreviations:
     - Ml
-- name: Mills
+- value: Mills
   abbreviations:
     - Mls
-- name: Mission
+- value: Mission
   abbreviations:
     - Msn
-- name: Motorway
+- value: Motorway
   abbreviations:
     - Mtwy
-- name: Mount
+- value: Mount
   abbreviations:
     - Mnt
     - Mt
-- name: Mountain
+- value: Mountain
   abbreviations:
     - Mntain
     - Mntn
     - Mtin
     - Mtn
-- name: Mountains
+- value: Mountains
   abbreviations:
     - Mntns
-- name: Neck
+- value: Neck
   abbreviations:
     - Nck
-- name: Orchard
+- value: Orchard
   abbreviations:
     - Orch
     - Orchrd
-- name: Oval
+- value: Oval
   abbreviations:
     - Ovl
-- name: Overpass
+- value: Overpass
   abbreviations:
     - Opas
-- name: Park
+- value: Park
   abbreviations:
     - Prk
-- name: Parks
+- value: Parks
   abbreviations:
     - Park
-- name: Parkway
+- value: Parkway
   abbreviations:
     - Parkwy
     - Pkway
     - Pkwy
     - Pky
-- name: Parkways
+- value: Parkways
   abbreviations:
     - Pkwys
     - Pkwy
-- name: Pass
-- name: Passage
+- value: Pass
+- value: Passage
   abbreviations:
     - Psge
-- name: Path
-- name: Pike
-- name: Pine
+- value: Path
+- value: Pike
+- value: Pine
   abbreviations:
     - Pne
-- name: Pines
+- value: Pines
   abbreviations:
     - Pnes
-- name: Place
+- value: Place
   abbreviations:
     - Pl
-- name: Plain
+- value: Plain
   abbreviations:
     - Pln
-- name: Plains
+- value: Plains
   abbreviations:
     - PLns
-- name: Plaza
+- value: Plaza
   abbreviations:
     - Plz
-- name: Point
+- value: Point
   abbreviations:
     - Pt
-- name: Points
+- value: Points
   abbreviations:
     - Pts
-- name: Port
+- value: Port
   abbreviations:
     - Prt
-- name: Ports
+- value: Ports
   abbreviations:
     - Prts
-- name: Prairie
+- value: Prairie
   abbreviations:
     - Pr
     - Prr
-- name: Radial
+- value: Radial
   abbreviations:
     - Rad
     - Radl
-- name: Ramp
-- name: Ranch
-- name: Rapid
+- value: Ramp
+- value: Ranch
+- value: Rapid
   abbreviations:
     - Rpd
-- name: Rapids
+- value: Rapids
   abbreviations:
     - Rpds
-- name: Rest
+- value: Rest
   abbreviations:
     - Rst
-- name: Ridge
+- value: Ridge
   abbreviations:
     - Rdgs
-- name: River
+- value: River
   abbreviations:
     - Riv
     - Rvr
     - Rivr
-- name: Road
+- value: Road
   abbreviations:
     - Rd
-- name: Roads
+- value: Roads
   abbreviations:
     - Rds
-- name: Route
+- value: Route
   abbreviations:
     - Rte
-- name: Row
-- name: Rue
-- name: Run
-- name: Shoal
+- value: Row
+- value: Rue
+- value: Run
+- value: Shoal
   abbreviations:
     - Shl
-- name: Shoals
+- value: Shoals
   abbreviations:
     - Shls
-- name: Shore
+- value: Shore
   abbreviations:
     - Shr
-- name: Shores
+- value: Shores
   abbreviations:
     - Shrs
-- name: Skyway
-- name: Spring
+- value: Skyway
+- value: Spring
   abbreviations:
     - Spg
     - Spng
     - Sprng
-- name: Springs
+- value: Springs
   abbreviations:
     - Spgs
     - Spngs
     - Sprngs
-- name: Spur
-- name: Spurs
+- value: Spur
+- value: Spurs
   abbreviations:
     - Spur
-- name: Sqaure
+- value: Sqaure
   abbreviations:
     - Sq
     - Sqr
     - Sqre
-- name: Squares
+- value: Squares
   abbreviations:
     - Sqrs
     - Sqs
-- name: Station
+- value: Station
   abbreviations:
     - Sta
     - Statn
     - Stn
-- name: Stravenue
+- value: Stravenue
   abbreviations:
     - Stra
     - Strav
     - Straven
     - Stravn
     - Strvnue
-- name: Stream
+- value: Stream
   abbreviations:
     - Strm
-- name: Street
+- value: Street
   abbreviations:
     - Strt
     - St
     - Str
-- name: Streets
+- value: Streets
   abbreviations:
     - Sts
-- name: Summit
+- value: Summit
   abbreviations:
     - Smt
-- name: Terrace
+- value: Terrace
   abbreviations:
     - Ter
     - Terr
-- name: Throughway
+- value: Throughway
   abbreviations:
     - Trwy
-- name: Trace
+- value: Trace
   abbreviations:
     - Trce
-- name: Track
+- value: Track
   abbreviations:
     - Trk
     - Trks
-- name: Trafficway
+- value: Trafficway
   abbreviations:
     - Trfy
-- name: Trail
+- value: Trail
   abbreviations:
     - Trl
     - Trls
-- name: Trailer
+- value: Trailer
   abbreviations:
     - Trlr
     - Trlrs
-- name: Tunnel
+- value: Tunnel
   abbreviations:
     - Tunl
     - Tunls
     - Tunnl
-- name: Turnpike
+- value: Turnpike
   abbreviations:
     - Trnpk
     - Turnpk
     - Tpke
-- name: Underpass
+- value: Underpass
   abbreviations:
     - Upas
-- name: Union
+- value: Union
   abbreviations:
     - Un
-- name: Unions
+- value: Unions
   abbreviations:
     - Uns
-- name: Valley
+- value: Valley
   abbreviations:
     - Vlly
     - Vly
-- name: Valleys
+- value: Valleys
   abbreviations:
     - Vlys
-- name: Viaduct
+- value: Viaduct
   abbreviations:
     - Vdct
     - Via
     - Viadct
-- name: View
+- value: View
   abbreviations:
     - Vw
-- name: Views
+- value: Views
   abbreviations:
     - Vws
-- name: Village
+- value: Village
   abbreviations:
     - Vill
     - Villag
     - Villg
     - Vlg
-- name: Villages
+- value: Villages
   abbreviations:
     - Vlgs
-- name: Ville
+- value: Ville
   abbreviations:
     - Vl
-- name: Vista
+- value: Vista
   abbreviations:
     - Vis
     - Vist
     - Vst
     - Vsta
-- name: Walk
-- name: Walks
+- value: Walk
+- value: Walks
   abbreviations:
     - Walk
-- name: Wall
-- name: Way
+- value: Wall
+- value: Way
   abbreviations:
     - Wy
-- name: Ways
-- name: Well
+- value: Ways
+- value: Well
   abbreviations:
     - Wl
-- name: Wells
+- value: Wells
   abbreviations:
     - Wls

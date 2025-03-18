@@ -1,24 +1,8 @@
 """Data Cache Module."""
 
-from typing import TypedDict
+from collections.abc import Callable
 
 from rapidfuzz import fuzz, process
-
-"""
-the_cache = {
-    "family": {
-        "bloggs":{
-          "values": {"Bloggs", " Bloggs", " bloggs "},
-          "attributes": {"lang": "en"},
-        },
-        "Smith": {"smith"},
-    },
-    "given": {
-        "joe": {"Joe", "JOE"},
-        "bob": {"Bob", "bob", "BOB"},
-    },
-}
-"""
 
 
 class NormalizedEntry:
@@ -40,8 +24,9 @@ class NormalizedEntry:
 class TagCache:
     """A tag cache in the data cache."""
 
-    _tag_cache: dict[str, NormalizedEntry] = {}
+    _tag_cache: dict[str, NormalizedEntry]
     tag: str
+    is_equal: Callable[[str, str], bool]
 
     def __init__(self, tag: str, values: set[str], attributes: dict[str, str] | None):
         """Initialize the tag cache."""
@@ -63,9 +48,16 @@ class TagCache:
 
         key = None
         if normalized_input not in self._tag_cache:
-            score = process.extractOne(normalized_input, self._tag_cache.keys(), scorer=fuzz.ratio)
-            if score and score[1] > 83:
-                key = score[0]
+            if self.is_equal is None:
+                score = process.extractOne(
+                    normalized_input, self._tag_cache.keys(), scorer=fuzz.ratio
+                )
+                if score and score[1] > 83:
+                    key = score[0]
+            else:
+                for _key in self._tag_cache:
+                    if self.is_equal(normalized_input, _key):
+                        key = _key
         else:
             key = normalized_input
 
@@ -109,10 +101,16 @@ class DataCache:
         """Get an item from the data cache."""
         return self._cache[key]
 
-    def add(self, tag: str, value: str, attributes: dict[str, str] | None = None):
+    def add(
+        self,
+        tag: str,
+        value: str,
+        attributes: dict[str, str] | None = None,
+        is_equal: Callable[[str, str], bool] | None = None,
+    ):
         """Add a value to the data cache."""
         if tag not in self._cache:
-            self._cache[tag] = TagCache(tag, value, attributes)
+            self._cache[tag] = TagCache(tag, value, attributes, is_equal)
         else:
             self._cache[tag].add(value, attributes)
 

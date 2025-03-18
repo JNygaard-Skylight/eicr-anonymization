@@ -64,8 +64,9 @@ class TestDataCache:
 
     def test_zip_4_5(self):
         """Test the DataCache class. When two values are not simliar they should not be grouped."""
+        tag = "test_tag"
         data_cache = DataCache()
-        data_cache.add("70724")
-        data_cache.add("70724-0504")
+        data_cache.add(tag, "70724")
+        data_cache.add(tag, "70724-0504")
         assert len(data_cache) == 1
         assert len(data_cache["70724"]) == 2

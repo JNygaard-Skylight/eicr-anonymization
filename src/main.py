@@ -9,18 +9,7 @@ import re
 from tabulate import tabulate
 
 from data_cache.main import DataCache
-from random_sw.main import (
-    get_random_city_mapping,
-    get_random_country_mapping,
-    get_random_county_mapping,
-    get_random_family_name_mapping,
-    get_random_given_name_mapping,
-    get_random_name_prefix_mapping,
-    get_random_name_suffix_mapping,
-    get_random_postal_code_mapping,
-    get_random_state_mapping,
-    get_random_street_address_mapping,
-)
+from tags.Tag import Tag
 
 logger = logging.getLogger(__name__)
 
@@ -90,37 +79,10 @@ def print_replacements(replacement_mappings: dict):
 
 def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
     """Replace sensitive fields in an EICR XML file using regex."""
-    sensitive_fields = {
-        "family": get_random_family_name_mapping,
-        "given": get_random_given_name_mapping,
-        "prefix": get_random_name_prefix_mapping,
-        "suffix": get_random_name_suffix_mapping,
-        "streetAddressLine": get_random_street_address_mapping,
-        "city": get_random_city_mapping,
-        "county": get_random_county_mapping,
-        "state": get_random_state_mapping,
-        "country": get_random_country_mapping,
-        "postalCode": get_random_postal_code_mapping,
-    }
-
-    extended_sensitive_fields = [
-        ("family", is_same_family_name, get_random_family_name_mapping),
-        ("given", is_same_given_name, get_random_given_name_mapping),
-        ("prefix", is_same_name_prefix, get_random_name_prefix_mapping),
-        ("suffix", is_same_name_suffix, get_random_name_suffix_mapping),
-        ("streetAddressLine", is_same_street_address, get_random_street_address_mapping),
-        ("city", is_same_city, get_random_city_mapping),
-        ("county", is_same_county, get_random_county_mapping),
-        ("state", is_same_state, get_random_state_mapping),
-        ("country", is_same_country, get_random_country_mapping),
-        ("postalCode", is_same_postal_code, get_random_postal_code_mapping),
-    ]
-
-    data_caches = {}
-    for tag in sensitive_fields:
-        data_caches[tag] = DataCache()
+    data_caches = DataCache()
+    for tag in Tag.registry.values():
         pattern = re.compile(
-            rf"(<(?:\w+:)?{tag}\b[^>]*>)(.*?)(?:(</(?:\w+:)?{tag}>)|(/>))", re.DOTALL
+            rf"(<(?:\w+:)?{tag.name}\b[^>]*>)(.*?)(?:(</(?:\w+:)?{tag.name}>)|(/>))", re.DOTALL
         )
         matches = pattern.findall(xml_text)
 
@@ -129,20 +91,20 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
                 continue
             attributes = parse_attributes(match[0])
             inner_text = match[1]
-            data_caches[tag].add(inner_text, attributes)
+            data_caches.add(tag, inner_text, attributes)
 
-        print(f"Found {len(matches)} instances of {len(data_caches[tag])} unique <{tag}> values ")
+        print(f"Found {len(matches)} instances of {len(data_caches[tag_name])} unique <{tag_name}> values ")
 
     debug_output = []
-    for tag, data_cache in data_caches.items():
+    for tag_name, data_cache in data_caches.items():
         for normalized_value, data in data_cache.items():
             xml_text, tag_debug_output = replace(
                 xml_text,
-                tag,
+                tag_name,
                 normalized_value,
                 data,
                 data_cache.attributes.get(normalized_value),
-                sensitive_fields[tag],
+                Tag.registry[tag_name].get_random_data_mapping,
             )
             debug_output.extend(tag_debug_output)
     if debug:
