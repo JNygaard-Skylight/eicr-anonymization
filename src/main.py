@@ -88,9 +88,15 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
 
         for match in matches:
             if match[3]:
-                continue
-            attributes = parse_attributes(match[0])
-            inner_text = match[1]
+                attributes = parse_attributes(match[0])
+                if "value" in attributes:
+                    inner_text = attributes["value"]
+                    attributes.pop("value")
+                else:
+                    continue
+            else:
+                attributes = parse_attributes(match[0])
+                inner_text = match[1]
             data_caches.add(tag_name, inner_text, attributes)
 
         print(
@@ -132,12 +138,22 @@ def replace(
         data[normalized_value].values, normalized_value, data[normalized_value].attributes
     )
     for raw_value, replacement in replacement_mappings.items():
-        pattern = re.compile(rf"(<{tag}\b[^>]*>)({raw_value})(</{tag}>)")
+        if hasattr(Tag.from_name(tag), "has_value"):
+            pattern = re.compile(
+                rf'(<{re.escape(tag)}\b[^>]*\bvalue="){re.escape(raw_value)}(")', re.DOTALL
+            )
+            matches = pattern.findall(xml_text)
+            xml_text = pattern.sub(
+                lambda m, replacement=replacement: f"{m.group(1)}{replacement}{m.group(2)}",
+                xml_text,
+            )
+        else:
+            pattern = re.compile(rf"(<{tag}\b[^>]*>)({raw_value})(</{tag}>)")
 
-        xml_text = pattern.sub(
-            lambda m, replacement=replacement: f"{m.group(1)}{replacement}{m.group(3)}",
-            xml_text,
-        )
+            xml_text = pattern.sub(
+                lambda m, replacement=replacement: f"{m.group(1)}{replacement}{m.group(3)}",
+                xml_text,
+            )
         debug_output.append(
             [
                 tag,
