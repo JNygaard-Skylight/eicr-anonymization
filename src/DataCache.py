@@ -2,7 +2,7 @@
 
 from collections.abc import Callable
 
-from rapidfuzz import fuzz, process
+from tags.Tag import Tag
 
 
 class NormalizedEntry:
@@ -25,18 +25,25 @@ class TagCache:
     """A tag cache in the data cache."""
 
     _tag_cache: dict[str, NormalizedEntry]
-    tag: str
+    tag: Tag
     is_equal: Callable[[str, str], bool]
 
-    def __init__(self, tag: str, values: set[str], attributes: dict[str, str] | None):
+    def __init__(
+        self, tag: str, value: str | None = None, attributes: dict[str, str] | None = None
+    ):
         """Initialize the tag cache."""
-        self.tag = tag
+        self.tag = Tag.from_name(tag)
         self._tag_cache = {}
-        self._add_new_key(values, attributes)
+        if value:
+            self._add_new_key(value, attributes)
 
     def __getitem__(self, key: str) -> set[str]:
         """Get the item in the tag cache."""
-        return self._tag_cache[self.get_key(key)].values
+        return self._tag_cache[self.get_key(key)]
+
+    def __iter__(self):
+        """Iterate over the tag cache."""
+        return iter(self._tag_cache.keys())
 
     def __len__(self) -> int:
         """Get the length of the tag cache."""
@@ -48,16 +55,10 @@ class TagCache:
 
         key = None
         if normalized_input not in self._tag_cache:
-            if self.is_equal is None:
-                score = process.extractOne(
-                    normalized_input, self._tag_cache.keys(), scorer=fuzz.ratio
-                )
-                if score and score[1] > 83:
-                    key = score[0]
-            else:
-                for _key in self._tag_cache:
-                    if self.is_equal(normalized_input, _key):
-                        key = _key
+            for _key in self._tag_cache:
+                if self.tag.is_equal(normalized_input, _key):
+                    key = _key
+                    break
         else:
             key = normalized_input
 
@@ -79,9 +80,9 @@ class TagCache:
         else:
             self._tag_cache[key].add(raw_value)
 
-        if attributes is not None:
-            self.add_attributes(key, attributes)
-
+    def items(self):
+        """Get the items in the tag cache."""
+        return self._tag_cache.items()
 
 CacheType = dict[str, TagCache]
 
@@ -92,6 +93,8 @@ class DataCache:
     def __init__(self):
         """Initialize the data cache."""
         self._cache: CacheType = {}
+        for tag in Tag.get_registry().values():
+            self._cache[tag.name] = TagCache(tag.name)
 
     def __len__(self) -> int:
         """Get the length of the data cache."""
@@ -99,20 +102,29 @@ class DataCache:
 
     def __getitem__(self, key: str) -> TagCache:
         """Get an item from the data cache."""
+        if key not in self._cache:
+            raise KeyError(f"Tag {key} not found in cache.")
         return self._cache[key]
+
+    def __iter__(self):
+        """Iterate over the data cache."""
+        return iter(self._cache.keys())
 
     def add(
         self,
         tag: str,
         value: str,
         attributes: dict[str, str] | None = None,
-        is_equal: Callable[[str, str], bool] | None = None,
     ):
         """Add a value to the data cache."""
         if tag not in self._cache:
-            self._cache[tag] = TagCache(tag, value, attributes, is_equal)
+            raise KeyError(f"Unknown Tag: {tag}")
         else:
             self._cache[tag].add(value, attributes)
+
+    def items(self):
+        """Get the items in the data cache."""
+        return self._cache.items()
 
 
 def _normalize(text: str) -> str:

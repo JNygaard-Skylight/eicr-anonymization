@@ -8,7 +8,7 @@ import re
 
 from tabulate import tabulate
 
-from data_cache.main import DataCache
+from DataCache import DataCache, TagCache
 from tags.Tag import Tag
 
 logger = logging.getLogger(__name__)
@@ -80,9 +80,9 @@ def print_replacements(replacement_mappings: dict):
 def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
     """Replace sensitive fields in an EICR XML file using regex."""
     data_caches = DataCache()
-    for tag in Tag.registry.values():
+    for tag_name in Tag.get_registry():
         pattern = re.compile(
-            rf"(<(?:\w+:)?{tag.name}\b[^>]*>)(.*?)(?:(</(?:\w+:)?{tag.name}>)|(/>))", re.DOTALL
+            rf"(<(?:\w+:)?{tag_name}\b[^>]*>)(.*?)(?:(</(?:\w+:)?{tag_name}>)|(/>))", re.DOTALL
         )
         matches = pattern.findall(xml_text)
 
@@ -91,9 +91,11 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
                 continue
             attributes = parse_attributes(match[0])
             inner_text = match[1]
-            data_caches.add(tag, inner_text, attributes)
+            data_caches.add(tag_name, inner_text, attributes)
 
-        print(f"Found {len(matches)} instances of {len(data_caches[tag_name])} unique <{tag_name}> values ")
+        print(
+            f"Found {len(matches)} instances of {len(data_caches[tag_name])} unique <{tag_name}> values"
+        )
 
     debug_output = []
     for tag_name, data_cache in data_caches.items():
@@ -102,9 +104,8 @@ def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
                 xml_text,
                 tag_name,
                 normalized_value,
-                data,
-                data_cache.attributes.get(normalized_value),
-                Tag.registry[tag_name].get_random_data_mapping,
+                data_cache,
+                Tag.from_name(tag_name).get_replacement_mapping,
             )
             debug_output.extend(tag_debug_output)
     if debug:
@@ -122,13 +123,14 @@ def replace(
     xml_text: str,
     tag: str,
     normalized_value: str,
-    data: set[str],
-    attributes: dict | None,
-    get_random_data_mapping: callable,
+    data: TagCache,
+    get_replacement_mapping: callable,
 ):
     """Replace the values in the XML text."""
     debug_output = []
-    replacement_mappings = get_random_data_mapping(data, normalized_value, attributes)
+    replacement_mappings = get_replacement_mapping(
+        data[normalized_value].values, normalized_value, data[normalized_value].attributes
+    )
     for raw_value, replacement in replacement_mappings.items():
         pattern = re.compile(rf"(<{tag}\b[^>]*>)({raw_value})(</{tag}>)")
 
