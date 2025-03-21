@@ -94,7 +94,7 @@ class Tag:
             Tag._registry[cls.name] = instance
 
     @classmethod
-    def get_registry(cls) -> list[str]:
+    def get_registry(cls) -> dict[str, "Tag"]:
         """Get a list of all registered tags."""
         return cls._registry
 
@@ -186,7 +186,38 @@ class PostalCodeTag(Tag):
 
 
 class TelecomTag(Tag):
-    """TElecom tag class."""
+    """Telecom tag class."""
 
     name = "telecom"
-    has_value = True
+    sensitive_attr = {"value"}
+
+class NameTag(Tag):
+    """Name tag class."""
+
+    name = "name"
+
+
+class TimeTag(Tag):
+    """Time tag class."""
+
+    name = "time"
+    sensitive_attr = {"value"}
+
+
+class LowTag(Tag):
+    """Low tag class."""
+
+    name = "low"
+    sensitive_attr = {"value"}
+
+class HighTag(Tag):
+    """High tag class."""
+
+    name = "high"
+    sensitive_attr = {"value"}
+
+class IdTag(Tag):
+    """ID tag class."""
+
+    name = "id"
+    sensitive_attr = {"extension", "root"}

@@ -5,6 +5,7 @@ import glob
 import logging
 import os
 import re
+import xml.etree.ElementTree as ET
 
 from tabulate import tabulate
 
@@ -12,6 +13,8 @@ from DataCache import DataCache, TagCache
 from tags.Tag import Tag
 
 logger = logging.getLogger(__name__)
+
+_namespace = "urn:hl7-org:v3"
 
 
 def _get_args():
@@ -39,6 +42,8 @@ def main():
     # Read XML files from input location
     input_location = args.input_location
     xml_files = glob.glob(os.path.join(input_location, "*.xml"))
+
+    ET.register_namespace("", _namespace)
 
     for xml_file in xml_files:
         with open(xml_file) as file:
@@ -77,30 +82,36 @@ def print_replacements(replacement_mappings: dict):
     )
 
 
+def find_all_with_namespace(root: ET.Element, path):
+    """Find all elements for a given path with the HL7 namepsace in an EICR XML file.
+
+    Replaces all instances of "ns" in the path with the HL7 namespace.
+    """
+    return root.findall(path, {"ns": _namespace})
+
+
 def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
     """Replace sensitive fields in an EICR XML file using regex."""
     data_caches = DataCache()
-    for tag_name in Tag.get_registry():
-        pattern = re.compile(
-            rf"(<(?:\w+:)?{tag_name}\b[^>]*>)(.*?)(?:(</(?:\w+:)?{tag_name}>)|(/>))", re.DOTALL
-        )
-        matches = pattern.findall(xml_text)
-
-        for match in matches:
-            if match[3]:
-                attributes = parse_attributes(match[0])
-                if "value" in attributes:
-                    inner_text = attributes["value"]
-                    attributes.pop("value")
-                else:
-                    continue
+    root = ET.fromstring(xml_text)
+    for tag in Tag.get_registry().values():
+        matches = find_all_with_namespace(root, f".//ns:{tag.name}")
+        for element in matches:
+            if element.text and element.text.strip():
+                inner_text = element.text
+            elif hasattr(tag, "sensitive_attr"):
+                sensitive_attr = tag.sensitive_attr
+                sensitive_attr_in_attributes = list(sensitive_attr & set(element.attrib.keys()))
+                if sensitive_attr_in_attributes:
+                    for attr in sensitive_attr_in_attributes:
+                        inner_text = element.attrib.pop(attr)
             else:
-                attributes = parse_attributes(match[0])
-                inner_text = match[1]
-            data_caches.add(tag_name, inner_text, attributes)
+                continue
+
+            data_caches.add(tag.name, inner_text, element.attrib)
 
         print(
-            f"Found {len(matches)} instances of {len(data_caches[tag_name])} unique <{tag_name}> values"
+            f"Found {len(matches)} instances of {len(data_caches[tag.name])} unique <{tag.name}> values"
         )
 
     debug_output = []
