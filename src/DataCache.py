@@ -1,132 +1,78 @@
 """Data Cache Module."""
 
-from collections.abc import Callable
-
 from tags.Tag import Tag
 
 
-class NormalizedEntry:
-    """A normalized entry in the data cache."""
+class NormalizedTagGroup:
+    """A simple data cache class."""
 
-    values: set[str]
-    attributes: dict[str, str] | None
+    def __init__(self, tag: Tag):
+        """Initialize the data cache."""
+        self._group: set[Tag] = {tag}
+        self._type = tag.__class__
 
-    def __init__(self, values: set[str], attributes: dict[str, str] | None):
-        """Initialize the normalized entry."""
-        self.values = values
-        self.attributes = attributes
-
-    def add(self, value: str):
-        """Add a value to the normalized entry."""
-        self.values.add(value)
-
-
-class TagCache:
-    """A tag cache in the data cache."""
-
-    _tag_cache: dict[str, NormalizedEntry]
-    tag: Tag
-    is_equal: Callable[[str, str], bool]
-
-    def __init__(
-        self, tag: str, value: str | None = None, attributes: dict[str, str] | None = None
-    ):
-        """Initialize the tag cache."""
-        self.tag = Tag.from_name(tag)
-        self._tag_cache = {}
-        if value:
-            self._add_new_key(value, attributes)
-
-    def __getitem__(self, key: str) -> set[str]:
-        """Get the item in the tag cache."""
-        return self._tag_cache[self.get_key(key)]
+    def __len__(self):
+        """Return the number of items in the cache."""
+        return len(self._group)
 
     def __iter__(self):
-        """Iterate over the tag cache."""
-        return iter(self._tag_cache.keys())
+        """Iterate over the cache."""
+        yield from self._group
 
-    def __len__(self) -> int:
-        """Get the length of the tag cache."""
-        return len(self._tag_cache)
+    @property
+    def type(self):
+        """Return the type of the tag."""
+        return self._type
 
-    def get_key(self, input: str) -> str:
-        """Get the normalized key for a given key. If it does not exist, create a new key."""
-        normalized_input = _normalize(input)
-
-        key = None
-        if normalized_input not in self._tag_cache:
-            for _key in self._tag_cache:
-                if self.tag.is_equal(normalized_input, _key):
-                    key = _key
-                    break
+    def add(self, tag: Tag):
+        """Add a tag to the cache."""
+        if tag.__class__ == self._type:
+            self._group.add(tag)
         else:
-            key = normalized_input
-
-        return key
-
-    def add_attributes(self, key: str, attributes: list[dict[str, str]]):
-        """Add an attribute to an existing item in the cache."""
-        self._tag_cache[key].attributes = attributes
-
-    def _add_new_key(self, raw_value: str, attributes: dict[str, str] | None = None):
-        """Add a new item to the cache."""
-        self._tag_cache[_normalize(raw_value)] = NormalizedEntry({raw_value}, attributes)
-
-    def add(self, raw_value: str, attributes: dict[str, str] | None = None):
-        """Add to an existing item in the cache."""
-        key = self.get_key(raw_value)
-        if key is None:
-            self._add_new_key(raw_value)
-        else:
-            self._tag_cache[key].add(raw_value)
-
-    def items(self):
-        """Get the items in the tag cache."""
-        return self._tag_cache.items()
-
-CacheType = dict[str, TagCache]
+            raise TypeError(f"Tag type {tag.__class__} does not match group type {self._type}.")
 
 
-class DataCache:
+    def get_replacement_mapping(self):
+        """Get the replacement mapping for the group.
+
+        This is the default implementation. It should be overridden by subclasses.
+
+        What I need:
+        If it has sensitive attributes
+            For each sensitive attribute, if any get a replacement value
+        else
+            Get a replacement value for the text
+
+        create a mapping from the orginal tag to the replacement tag
+        """
+        return self._type.get_replacement_mapping(self._group)
+
+
+class NormalizedTagGroups:
     """A simple data cache class."""
 
     def __init__(self):
         """Initialize the data cache."""
-        self._cache: CacheType = {}
-        for tag in Tag.get_registry().values():
-            self._cache[tag.name] = TagCache(tag.name)
+        self._groups: dict[int, set[Tag]] = {}
 
-    def __len__(self) -> int:
-        """Get the length of the data cache."""
-        return len(self._cache)
+    def __len__(self):
+        """Return the number of items in the cache."""
+        return len(self._groups)
 
-    def __getitem__(self, key: str) -> TagCache:
-        """Get an item from the data cache."""
-        if key not in self._cache:
-            raise KeyError(f"Tag {key} not found in cache.")
-        return self._cache[key]
+    def add(self, tag: Tag):
+        """Add a tag to the cache."""
+        tag_hash = tag.normalized_hash
+        if tag_hash not in self._groups:
+            self._groups[tag_hash] = NormalizedTagGroup(tag)
+        self._groups[tag_hash].add(tag)
+
+    def __getitem__(self, tag_hash: int) -> set[Tag]:
+        """Get the tags for a given hash."""
+        if tag_hash in self._groups:
+            return self._groups[tag_hash]
+        else:
+            raise KeyError(f"Tag hash {tag_hash} not found in cache.")
 
     def __iter__(self):
-        """Iterate over the data cache."""
-        return iter(self._cache.keys())
-
-    def add(
-        self,
-        tag: str,
-        value: str,
-        attributes: dict[str, str] | None = None,
-    ):
-        """Add a value to the data cache."""
-        if tag not in self._cache:
-            raise KeyError(f"Unknown Tag: {tag}")
-        else:
-            self._cache[tag].add(value, attributes)
-
-    def items(self):
-        """Get the items in the data cache."""
-        return self._cache.items()
-
-
-def _normalize(text: str) -> str:
-    """Normalize the text."""
-    return text.lower().replace(".", "").strip()
+        """Iterate over the cache."""
+        yield from self._groups.values()

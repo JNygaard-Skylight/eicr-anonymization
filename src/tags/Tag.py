@@ -68,7 +68,9 @@ def _match_formatting(old_value: str, new_value: str) -> str:
     )
 
 
-def _map_values_to_formatted_replacement(raw_values: str, replacement: str) -> dict[str, str]:
+def _map_values_to_formatted_replacement(
+    raw_values: set["Tag"], replacement: str
+) -> dict["Tag", "Tag"]:
     """Map raw values to a replacement value and match the whitespace and case."""
     mappings = {}
     for raw_value in raw_values:
@@ -90,8 +92,25 @@ class Tag:
         """Register the tag class."""
         super().__init_subclass__(**kwargs)
         if hasattr(cls, "name") and cls.name:
-            instance = cls()
-            Tag._registry[cls.name] = instance
+            Tag._registry[cls.name] = cls
+
+    def __init__(self, text: str | None = None, attributes: dict[str, str] | None = None):
+        """Initialize the tag."""
+        self._text = text
+        self._attributes = attributes or {}
+
+    def __repr__(self) -> str:
+        """Get a string representation of the tag."""
+        repr = f"<{self.name}"
+        for attribute in self.attributes:
+            repr += f' {attribute}="{self.attributes[attribute]}"'
+
+        if self.text:
+            repr += f">{self.text}</{self.name}>"
+        else:
+            repr += " />"
+
+        return repr
 
     @classmethod
     def get_registry(cls) -> dict[str, "Tag"]:
@@ -106,23 +125,108 @@ class Tag:
     @classmethod
     def get_replacement_mapping(
         cls,
-        raw_values: set[str],
-        normalized_value: str | None = None,
-        attributes: dict[str, str] | None = None,
+        raw_values: set["Tag"],
     ) -> dict[str, str]:
         """Get a replacement mapping."""
         replacement = "REMOVED"
-        return _map_values_to_formatted_replacement(raw_values, replacement)
+        sensitive_attr_replacements = None
+        if hasattr(cls, "sensitive_attr"):
+            sensitive_attr_replacements = {}
+            for attr in cls.sensitive_attr:
+                sensitive_attr_replacements[attr] = replacement
+
+        mapping = {}
+        for tag in raw_values:
+            attribute_replacements = tag.attributes.copy() if tag.attributes else None
+            if sensitive_attr_replacements:
+                for attr, value in sensitive_attr_replacements.items():
+                    if attr in attribute_replacements:
+                        attribute_replacements[attr] = value
+
+            replacement_text = None
+            if tag.text:
+                replacement_text = _match_formatting(tag.text, replacement)
+            mapping[tag] = tag.__class__(text=replacement_text, attributes=attribute_replacements)
+
+        return mapping
 
     @classmethod
-    def normalize(cls, value: str) -> str:
+    def normalize(cls, value: str | None) -> str:
         """Normalize a string."""
-        return value.lower().strip().replace(".", "")
+        if value is None:
+            return None
+        else:
+            return value.lower().strip().replace(".", "")
 
     @classmethod
     def is_equal(cls, a: str, b: str) -> bool:
         """Check if two strings are equal."""
         return cls.normalize(a) == cls.normalize(b)
+
+    @property
+    def text(self) -> str:
+        """Get the text of the tag."""
+        return self._text
+
+    @property
+    def normalized_text(self) -> str:
+        """Get the normalized text of the tag."""
+        return self.normalize(self._text)
+
+    @property
+    def attributes(self) -> dict[str, str]:
+        """Get the attributes of the tag."""
+        return self._attributes
+
+    def __eq__(self, other: object) -> bool:
+        """Check if two tags are equal.
+
+        Two tags are equal if:
+        - They have the same name
+        - They have the same sensitive attributes (if any)
+        - They have the same text when normalized.
+        - They have the same attributes and the same values for those attributes
+        """
+        return (
+            isinstance(other, self.__class__)
+            and self.name == other.name
+            and getattr(self, "sensitive_attr", None) == getattr(other, "sensitive_attr", None)
+            and self.normalized_text == other.normalized_text
+            and self.attributes == other.attributes
+        )
+
+    def __hash__(self) -> int:
+        """Get the hash of the tag."""
+        return hash(
+            (
+                self.name,
+                self.text,
+                self._tuple_attributes(),
+                getattr(self, "sensitive_attr", None),
+            )
+        )
+
+    def _tuple_attributes(self) -> int:
+        """Get the tuples of the attributes."""
+        return tuple(sorted(self.attributes.items()))
+
+    def _normalize_attributes(self) -> tuple[str, str]:
+        """Get the hash of the attributes."""
+        return tuple(
+            [(key, self.normalize(value)) for key, value in sorted(self.attributes.items())]
+        )
+
+    @property
+    def normalized_hash(self) -> int:
+        """Get the hash of the normalized text."""
+        return hash(
+            (
+                self.name,
+                self.normalized_text,
+                self._normalize_attributes(),
+                getattr(self, "sensitive_attr", None),
+            )
+        )
 
 
 class FamilyTag(Tag):
@@ -189,7 +293,8 @@ class TelecomTag(Tag):
     """Telecom tag class."""
 
     name = "telecom"
-    sensitive_attr = {"value"}
+    sensitive_attr = ("value",)
+
 
 class NameTag(Tag):
     """Name tag class."""
@@ -201,23 +306,25 @@ class TimeTag(Tag):
     """Time tag class."""
 
     name = "time"
-    sensitive_attr = {"value"}
+    sensitive_attr = ("value",)
 
 
 class LowTag(Tag):
     """Low tag class."""
 
     name = "low"
-    sensitive_attr = {"value"}
+    sensitive_attr = ("value",)
+
 
 class HighTag(Tag):
     """High tag class."""
 
     name = "high"
-    sensitive_attr = {"value"}
+    sensitive_attr = ("value",)
+
 
 class IdTag(Tag):
     """ID tag class."""
 
     name = "id"
-    sensitive_attr = {"extension", "root"}
+    sensitive_attr = ("extension", "root")

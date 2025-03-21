@@ -5,16 +5,17 @@ import glob
 import logging
 import os
 import re
-import xml.etree.ElementTree as ET
 
+from lxml import etree
 from tabulate import tabulate
 
-from DataCache import DataCache, TagCache
+from DataCache import NormalizedTagGroups
 from tags.Tag import Tag
 
 logger = logging.getLogger(__name__)
 
 _namespace = "urn:hl7-org:v3"
+_namespaces = {"ns": _namespace}
 
 
 def _get_args():
@@ -43,12 +44,12 @@ def main():
     input_location = args.input_location
     xml_files = glob.glob(os.path.join(input_location, "*.xml"))
 
-    ET.register_namespace("", _namespace)
 
     for xml_file in xml_files:
         with open(xml_file) as file:
-            xml_text = file.read()
-        updated_xml = simple_replacement_regex(xml_text, debug=args.debug)
+            # xml_text = file.read()
+            tree = etree.parse(file)
+        updated_xml = simple_replacement_regex(tree, debug=args.debug)
 
         with open(f"{xml_file}.anonymized.xml", "w", encoding="utf-8") as f:
             f.write(updated_xml)
@@ -82,99 +83,73 @@ def print_replacements(replacement_mappings: dict):
     )
 
 
-def find_all_with_namespace(root: ET.Element, path):
+def find_all_with_namespace(root: etree.Element, path):
     """Find all elements for a given path with the HL7 namepsace in an EICR XML file.
 
     Replaces all instances of "ns" in the path with the HL7 namespace.
     """
-    return root.findall(path, {"ns": _namespace})
+    return root.xpath(path, namespaces=_namespaces)
 
 
-def simple_replacement_regex(xml_text: str, debug: bool = False) -> str:
+def simple_replacement_regex(tree, debug: bool = False) -> str:
     """Replace sensitive fields in an EICR XML file using regex."""
-    data_caches = DataCache()
-    root = ET.fromstring(xml_text)
+    root = tree.getroot()
+    data_caches = NormalizedTagGroups()
     for tag in Tag.get_registry().values():
         matches = find_all_with_namespace(root, f".//ns:{tag.name}")
         for element in matches:
-            if element.text and element.text.strip():
-                inner_text = element.text
-            elif hasattr(tag, "sensitive_attr"):
-                sensitive_attr = tag.sensitive_attr
-                sensitive_attr_in_attributes = list(sensitive_attr & set(element.attrib.keys()))
-                if sensitive_attr_in_attributes:
-                    for attr in sensitive_attr_in_attributes:
-                        inner_text = element.attrib.pop(attr)
+            if (element.text and element.text.strip()) or (
+                hasattr(tag, "sensitive_attr")
+                and any(attr in element.attrib for attr in tag.sensitive_attr)
+            ):
+                # Create an instance of the tag and add it to the data cache
+                tag_instance = tag(
+                    text=element.text,
+                    attributes=dict(element.attrib),
+                )
+                data_caches.add(tag_instance)
             else:
                 continue
 
-            data_caches.add(tag.name, inner_text, element.attrib)
-
-        print(
-            f"Found {len(matches)} instances of {len(data_caches[tag.name])} unique <{tag.name}> values"
-        )
-
     debug_output = []
-    for tag_name, data_cache in data_caches.items():
-        for normalized_value, data in data_cache.items():
-            xml_text, tag_debug_output = replace(
-                xml_text,
-                tag_name,
-                normalized_value,
-                data_cache,
-                Tag.from_name(tag_name).get_replacement_mapping,
+
+    for tag_group in data_caches:
+        replacement_mapping = tag_group.get_replacement_mapping()
+
+
+
+        for instance in tag_group:
+            xpath = f".//ns:{instance.name}"
+            if instance.attributes:
+                for attribute in instance.attributes:
+                    xpath += f'[@{attribute}="{instance.attributes[attribute]}"]'
+            else:
+                xpath += "[not(@*)]"
+            matches = find_all_with_namespace(root, xpath)
+
+            for match in matches:
+                if instance.text:
+                    match.text = replacement_mapping[instance].text
+                for attribute in match.attrib:
+                    if attribute in replacement_mapping[instance].attributes:
+                        match.attrib[attribute] = replacement_mapping[instance].attributes[attribute]
+
+            debug_output.append(
+                [
+                    instance,
+                    replacement_mapping[instance],
+                ]
             )
-            debug_output.extend(tag_debug_output)
+
     if debug:
         print(
             tabulate(
                 debug_output,
-                headers=["Tag", "Normalized Value", "Original", "Replacement"],
+                headers=["Original", "Replacement"],
                 tablefmt="fancy_outline",
             )
         )
-    return xml_text
-
-
-def replace(
-    xml_text: str,
-    tag: str,
-    normalized_value: str,
-    data: TagCache,
-    get_replacement_mapping: callable,
-):
-    """Replace the values in the XML text."""
-    debug_output = []
-    replacement_mappings = get_replacement_mapping(
-        data[normalized_value].values, normalized_value, data[normalized_value].attributes
-    )
-    for raw_value, replacement in replacement_mappings.items():
-        if hasattr(Tag.from_name(tag), "has_value"):
-            pattern = re.compile(
-                rf'(<{re.escape(tag)}\b[^>]*\bvalue="){re.escape(raw_value)}(")', re.DOTALL
-            )
-            matches = pattern.findall(xml_text)
-            xml_text = pattern.sub(
-                lambda m, replacement=replacement: f"{m.group(1)}{replacement}{m.group(2)}",
-                xml_text,
-            )
-        else:
-            pattern = re.compile(rf"(<{tag}\b[^>]*>)({raw_value})(</{tag}>)")
-
-            xml_text = pattern.sub(
-                lambda m, replacement=replacement: f"{m.group(1)}{replacement}{m.group(3)}",
-                xml_text,
-            )
-        debug_output.append(
-            [
-                tag,
-                normalized_value,
-                f"`{raw_value}`",
-                f"`{replacement}`",
-            ]
-        )
-
-    return xml_text, debug_output
+    return etree.tostring(root, encoding="unicode")
 
 
 if __name__ == "__main__":
