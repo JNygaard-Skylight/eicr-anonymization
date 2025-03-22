@@ -1,6 +1,6 @@
 """Tag Class."""
 
-from random import randint
+from random import choice, randint
 from typing import ClassVar, Literal, NotRequired, TypedDict
 
 import yaml
@@ -18,7 +18,7 @@ class ReplacementType(TypedDict):
 def _read_yaml(file_name: str) -> list[ReplacementType]:
     """Read a YAML file and return its contents as a list of strings."""
     with open("src/star-wars-data/" + file_name) as file:
-        return [yaml.safe_load(file)]
+        return yaml.safe_load(file)
 
 
 def _get_leading_trailing_whitespace(value: str) -> tuple[str, str]:
@@ -81,6 +81,8 @@ def _get_random_int(digits: int):
 class Tag:
     """Tag class."""
 
+    default_replace_value = "REMOVED"
+
     _registry: ClassVar[dict[str, "Tag"]] = {}
 
     def __init_subclass__(cls, **kwargs) -> None:
@@ -107,6 +109,12 @@ class Tag:
 
         return repr
 
+    def __setattr__(self, name, value):
+        """Make name, sensitive_attr, and replacements read-only."""
+        if name in ("name", "sensitive_attr", "replacement_values"):
+            raise AttributeError(f"{name} is read-only")
+        super().__setattr__(name, value)
+
     @classmethod
     def get_registry(cls) -> dict[str, "Tag"]:
         """Get a list of all registered tags."""
@@ -123,7 +131,11 @@ class Tag:
         raw_values: set["Tag"],
     ) -> dict[str, str]:
         """Get a replacement mapping."""
-        replacement = "REMOVED"
+        if hasattr(cls, "replacement_values") and cls.replacement_values:
+            replacement = choice(cls.replacement_values)["value"]
+        else:
+            replacement = cls.default_replace_value
+
         sensitive_attr_replacements = None
         if hasattr(cls, "sensitive_attr"):
             sensitive_attr_replacements = {}
@@ -228,6 +240,7 @@ class FamilyTag(Tag):
     """Family tag class."""
 
     name = "family"
+    replacement_values = _read_yaml("family_names.yaml")
 
 
 class GivenTag(Tag):

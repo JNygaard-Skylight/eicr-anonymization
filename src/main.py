@@ -117,6 +117,8 @@ def simple_replacement_regex(tree, debug: bool = False) -> str:
 
         for instance in tag_group:
             xpath = f".//ns:{instance.name}"
+            if instance.text:
+                xpath += f"[text()='{instance.text}']"
             if instance.attributes:
                 for attribute in instance.attributes:
                     xpath += f'[@{attribute}="{instance.attributes[attribute]}"]'

@@ -16,6 +16,12 @@ def test_immutable_attributes():
     with pytest.raises(AttributeError):
         tag.sensitive_attr = "new_value"
 
+def test_immutable_replacement_values():
+    """Test that the replacement values of the tag are immutable."""
+    tag = FamilyTag()
+    with pytest.raises(AttributeError):
+        tag.replacement_values = "new_value"
+
 
 def test_equality_empty():
     """Test the equality of two tags."""
@@ -100,13 +106,16 @@ def test_normalized_hash():
     tag1 = FamilyTag("Bloggs")
     tag2 = FamilyTag("BLOGGS")
     # Assert both tags are the same class
-    test_set = {tag1.normalized_hash, tag2.normalized_hash}
-    assert len(test_set) == 1
+    assert tag1.normalized_hash == tag2.normalized_hash
 
-def test_get_replacement_mapping():
-    """Test the get_replacement_mapping method."""
-    tag1 = FamilyTag("Bloggs")
-    # Assert both tags are the same class
-    mappings = tag1.get_replacement_mapping({tag1})
-    assert len(mappings) == 1
-    assert next(iter(mappings.values())).text == "REMOVED"
+
+class TestFamilyTag:
+    """Test the FamilyTag class."""
+
+    def test_get_replacement_mapping():
+        """Test the get_replacement_mapping method."""
+        tag1 = FamilyTag("Bloggs")
+        # Assert both tags are the same class
+        mappings = tag1.get_replacement_mapping({tag1})
+        assert len(mappings) == 1
+        assert next(iter(mappings.values())).text == "REMOVED"
