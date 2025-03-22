@@ -44,7 +44,7 @@ select = [
 ]
 ignore = [
   "S311", # suspicious-non-cryptographic-random-usage
-  "S314", # suspicious-xml-element-tree-usage (S314)
+  "S320", # suspicious-xmle-tree-usage
 ]
 
 [tool.ruff.lint.per-file-ignores]

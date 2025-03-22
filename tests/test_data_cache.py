@@ -1,6 +1,5 @@
 """Test test_data_cache.py."""
 
-import pytest
 
 from DataCache import NormalizedTagGroups
 from tags.Tag import FamilyTag

@@ -44,7 +44,6 @@ def main():
     input_location = args.input_location
     xml_files = glob.glob(os.path.join(input_location, "*.xml"))
 
-
     for xml_file in xml_files:
         with open(xml_file) as file:
             # xml_text = file.read()
@@ -116,8 +115,6 @@ def simple_replacement_regex(tree, debug: bool = False) -> str:
     for tag_group in data_caches:
         replacement_mapping = tag_group.get_replacement_mapping()
 
-
-
         for instance in tag_group:
             xpath = f".//ns:{instance.name}"
             if instance.attributes:
@@ -132,7 +129,9 @@ def simple_replacement_regex(tree, debug: bool = False) -> str:
                     match.text = replacement_mapping[instance].text
                 for attribute in match.attrib:
                     if attribute in replacement_mapping[instance].attributes:
-                        match.attrib[attribute] = replacement_mapping[instance].attributes[attribute]
+                        match.attrib[attribute] = replacement_mapping[instance].attributes[
+                            attribute
+                        ]
 
             debug_output.append(
                 [
