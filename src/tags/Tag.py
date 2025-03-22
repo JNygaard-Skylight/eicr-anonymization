@@ -323,3 +323,10 @@ class IdTag(Tag):
 
     name = "id"
     sensitive_attr = ("extension", "root")
+
+
+class EffectiveTimeTag(Tag):
+    """Effective time tag class."""
+
+    name = "effectiveTime"
+    sensitive_attr = ("value",)
