@@ -247,18 +247,21 @@ class GivenTag(Tag):
     """Given tag class."""
 
     name = "given"
+    replacement_values = _read_yaml("given_names.yaml")
 
 
 class PrefixTag(Tag):
     """Name prefix tag class."""
 
     name = "prefix"
+    replacement_values = _read_yaml("name_prefixes.yaml")
 
 
 class SuffixTag(Tag):
     """Name suffix tag class."""
 
     name = "suffix"
+    replacement_values = _read_yaml("name_suffixes.yaml")
 
 
 class StreetAddressTag(Tag):
@@ -271,24 +274,28 @@ class CityTag(Tag):
     """City tag class."""
 
     name = "city"
+    replacement_values = _read_yaml("city_names.yaml")
 
 
 class CountyTag(Tag):
     """County tag class."""
 
     name = "county"
+    replacement_values = _read_yaml("county_names.yaml")
 
 
 class StateTag(Tag):
     """State tag class."""
 
     name = "state"
+    replacement_values = _read_yaml("state_names.yaml")
 
 
 class CountryTag(Tag):
     """Country tag class."""
 
     name = "country"
+    replacement_values = _read_yaml("country_names.yaml")
 
 
 class PostalCodeTag(Tag):
