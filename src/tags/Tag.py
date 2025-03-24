@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta
 from random import choice, randint, random
+import re
 from typing import ClassVar, Literal, NotRequired, TypedDict
 
 import yaml
@@ -499,6 +500,30 @@ class IdTag(Tag):
 
     name = "id"
     sensitive_attr = ("extension", "root")
+    oid_pattern = re.compile(r"^[0-2](\.(0|[1-9][0-9]*))+$")
+    _root_oids = {}
+    _extension_oids = {}
+
+    def __init__(self, text=None, attributes=None):
+        """Initialize the ID tag."""
+        super().__init__(text, attributes)
+
+        if self.__class__.oid_pattern.match(self.attributes.get("root")):
+            segments = self.attributes["root"].split(".")
+            for i, segment in enumerate(segments):
+                if segment not in self._root_oids:
+                    self.__class__._root_oids.setdefault(i, {})[segment] = _get_random_int(
+                        len(segment)
+                    )
+        if self.attributes.get("extension") and self.__class__.oid_pattern.match(
+            self.attributes["extension"]
+        ):
+            segments = self.attributes["extension"].split(".")
+            for i, segment in enumerate(segments):
+                if segment not in self._extension_oids:
+                    self.__class__._extension_oids.setdefault(i, {})[segment] = _get_random_int(
+                        len(segment)
+                    )
 
     @classmethod
     def normalize(cls, value: str | None) -> str:
@@ -518,18 +543,26 @@ class IdTag(Tag):
         sensitive_attr_replacements = None
         sensitive_attr_replacements = {}
 
-        for sensitive_attr_key in cls.sensitive_attr:
-            for key, value in normalized_tag.attributes.items():
-                replacement = ""
-                if key == sensitive_attr_key:
-                    for char in value:
-                        if char.isdigit():
-                            replacement += str(randint(0, 9))
-                        elif char.isalpha():
-                            replacement += choice("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-                        else:
-                            replacement += char
-                    sensitive_attr_replacements[key] = replacement
+        if cls.oid_pattern.match(normalized_tag.attributes["root"]):
+            replacement_parts = []
+            segments = normalized_tag.attributes["root"].split(".")
+            for i, segment in enumerate(segments):
+                if segment in cls._root_oids[i]:
+                    replacement_parts.append(str(cls._root_oids[i][segment]))
+                else:
+                    raise ValueError(
+                        f"Segment {segment} not found in root OID mapping for {normalized_tag.name}"
+                    )
+            if "extension" in normalized_tag.attributes:
+                sensitive_attr_replacements["root"] = ".".join(replacement_parts)
+                sensitive_attr_replacements["extension"] = cls.random_alpha_digits(
+                    normalized_tag.attributes["extension"]
+                )
+        else:
+            for sensitive_attr_key in cls.sensitive_attr:
+                for key, value in normalized_tag.attributes.items():
+                    if key == sensitive_attr_key:
+                        sensitive_attr_replacements[key] = cls.random_alpha_digits(value)
 
         mapping = {}
         for tag in raw_values:
@@ -541,3 +574,15 @@ class IdTag(Tag):
         mapping[tag] = tag.__class__(text=tag.text, attributes=attribute_replacements)
 
         return mapping
+
+    @staticmethod
+    def random_alpha_digits(value):
+        replacement = ""
+        for char in value:
+            if char.isdigit():
+                replacement += str(randint(0, 9))
+            elif char.isalpha():
+                replacement += choice("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+            else:
+                replacement += char
+        return replacement
