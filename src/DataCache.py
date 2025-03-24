@@ -10,6 +10,7 @@ class NormalizedTagGroup:
         """Initialize the data cache."""
         self._group: set[Tag] = {tag}
         self._type = tag.__class__
+        self._normalized_tag = tag.__class__(text=tag.normalized_text, attributes=tag.attributes)
 
     def __len__(self):
         """Return the number of items in the cache."""
@@ -31,21 +32,9 @@ class NormalizedTagGroup:
         else:
             raise TypeError(f"Tag type {tag.__class__} does not match group type {self._type}.")
 
-
     def get_replacement_mapping(self):
-        """Get the replacement mapping for the group.
-
-        This is the default implementation. It should be overridden by subclasses.
-
-        What I need:
-        If it has sensitive attributes
-            For each sensitive attribute, if any get a replacement value
-        else
-            Get a replacement value for the text
-
-        create a mapping from the orginal tag to the replacement tag
-        """
-        return self._type.get_replacement_mapping(self._group)
+        """Get the replacement mapping for the group."""
+        return self._type.get_replacement_mapping(self._normalized_tag, self._group)
 
 
 class NormalizedTagGroups:

@@ -128,6 +128,7 @@ class Tag:
     @classmethod
     def get_replacement_mapping(
         cls,
+        normalized_tag: "Tag",
         raw_values: set["Tag"],
     ) -> dict[str, str]:
         """Get a replacement mapping."""
@@ -223,7 +224,8 @@ class Tag:
         """Get the tuples of the attributes."""
         return tuple(sorted(self.attributes.items()))
 
-    def _normalize_attributes(self) -> tuple[str, str]:
+    @property
+    def normalized_attributes(self) -> tuple[str, str]:
         """Get the hash of the attributes."""
         return tuple(
             [(key, self.normalize(value)) for key, value in sorted(self.attributes.items())]
@@ -236,7 +238,7 @@ class Tag:
             (
                 self.name,
                 self.normalized_text,
-                self._normalize_attributes(),
+                self.normalized_attributes,
                 getattr(self, "sensitive_attr", None),
             )
         )
@@ -277,7 +279,6 @@ class StreetAddressTag(Tag):
     _street_names = _read_yaml("street_names.yaml")
     _street_types = _read_yaml("street_types.yaml")
 
-
     @classmethod
     def get_replacement_value(
         cls,
@@ -300,17 +301,19 @@ class StreetAddressTag(Tag):
         elif direction_type < 0.66:
             post_direction = choice(["N", "NE", "E", "SE", "S", "SW", "W", "NW"])
 
-
         street_name = choice(cls._street_names)["value"]
         street_type = choice(cls._street_types)["value"]
         replacement = " ".join(
-            filter(None, [
-                str(number),
-                pre_direction,
-                street_name,
-                street_type,
-                post_direction,
-            ])
+            filter(
+                None,
+                [
+                    str(number),
+                    pre_direction,
+                    street_name,
+                    street_type,
+                    post_direction,
+                ],
+            )
         ).strip()
 
         return replacement
@@ -348,6 +351,18 @@ class PostalCodeTag(Tag):
     """Postal code tag class."""
 
     name = "postalCode"
+
+    @classmethod
+    def get_replacement_value(
+        cls,
+        raw_values: set["Tag"],
+    ) -> dict[str, str]:
+        """Get a replacement value."""
+        replacement = str(_get_random_int(5))
+        if random() < 0.5:
+            replacement += f"-{_get_random_int(4)!s}"
+
+        return replacement
 
 
 class TelecomTag(Tag):
@@ -389,6 +404,50 @@ class IdTag(Tag):
 
     name = "id"
     sensitive_attr = ("extension", "root")
+
+
+    @classmethod
+    def normalize(cls, value: str | None) -> str:
+        """Normalize a string."""
+        if value is None:
+            return None
+        else:
+            return value.lower().strip()
+
+    @classmethod
+    def get_replacement_mapping(
+        cls,
+        normalized_tag: Tag,
+        raw_values: set[Tag],
+    ) -> dict[str, str]:
+        """Get a replacement mapping."""
+        sensitive_attr_replacements = None
+        sensitive_attr_replacements = {}
+
+
+        for sensitive_attr_key in cls.sensitive_attr:
+            for key, value in normalized_tag.attributes.items():
+                replacement = ""
+                if key == sensitive_attr_key:
+                    for char in value:
+                        if char.isdigit():
+                            replacement += str(randint(0, 9))
+                        elif char.isalpha():
+                            replacement += choice("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+                        else:
+                            replacement += char
+                    sensitive_attr_replacements[key] = replacement
+
+        mapping = {}
+        for tag in raw_values:
+            attribute_replacements = tag.attributes.copy() if tag.attributes else None
+            for attr, value in sensitive_attr_replacements.items():
+                if attr in attribute_replacements:
+                    attribute_replacements[attr] = value
+
+        mapping[tag] = tag.__class__(text=tag.text, attributes=attribute_replacements)
+
+        return mapping
 
 
 class EffectiveTimeTag(Tag):
