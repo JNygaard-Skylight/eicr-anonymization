@@ -553,8 +553,8 @@ class IdTag(Tag):
                     raise ValueError(
                         f"Segment {segment} not found in root OID mapping for {normalized_tag.name}"
                     )
+            sensitive_attr_replacements["root"] = ".".join(replacement_parts)
             if "extension" in normalized_tag.attributes:
-                sensitive_attr_replacements["root"] = ".".join(replacement_parts)
                 sensitive_attr_replacements["extension"] = cls.random_alpha_digits(
                     normalized_tag.attributes["extension"]
                 )
@@ -577,6 +577,7 @@ class IdTag(Tag):
 
     @staticmethod
     def random_alpha_digits(value):
+        """Generate a random string of digits and uppercase letters."""
         replacement = ""
         for char in value:
             if char.isdigit():
