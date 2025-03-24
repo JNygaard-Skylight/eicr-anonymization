@@ -1,6 +1,6 @@
 """Tag Class."""
 
-from random import choice, randint
+from random import choice, randint, random
 from typing import ClassVar, Literal, NotRequired, TypedDict
 
 import yaml
@@ -131,10 +131,7 @@ class Tag:
         raw_values: set["Tag"],
     ) -> dict[str, str]:
         """Get a replacement mapping."""
-        if hasattr(cls, "replacement_values") and cls.replacement_values:
-            replacement = choice(cls.replacement_values)["value"]
-        else:
-            replacement = cls.default_replace_value
+        replacement = cls.get_replacement_value(raw_values)
 
         sensitive_attr_replacements = None
         if hasattr(cls, "sensitive_attr"):
@@ -156,6 +153,15 @@ class Tag:
             mapping[tag] = tag.__class__(text=replacement_text, attributes=attribute_replacements)
 
         return mapping
+
+    @classmethod
+    def get_replacement_value(cls, raw_values: set["Tag"]) -> str:
+        """Get a replacement value."""
+        if hasattr(cls, "replacement_values") and cls.replacement_values:
+            replacement = choice(cls.replacement_values)["value"]
+        else:
+            replacement = cls.default_replace_value
+        return replacement
 
     @classmethod
     def normalize(cls, value: str | None) -> str:
@@ -268,6 +274,46 @@ class StreetAddressTag(Tag):
     """Street address tag class."""
 
     name = "streetAddressLine"
+    _street_names = _read_yaml("street_names.yaml")
+    _street_types = _read_yaml("street_types.yaml")
+
+
+    @classmethod
+    def get_replacement_value(
+        cls,
+        raw_values: set["Tag"],
+    ) -> dict[str, str]:
+        """Get a replacement mapping.
+
+        Simple replacement:
+         Random number
+         random choice between pre-direction, post-direction, or direction.
+         Random street name
+         random street type
+        """
+        number = _get_random_int(4)
+        pre_direction = ""
+        post_direction = ""
+        direction_type = random()
+        if direction_type < 0.33:
+            pre_direction = choice(["N", "NE", "E", "SE", "S", "SW", "W", "NW"])
+        elif direction_type < 0.66:
+            post_direction = choice(["N", "NE", "E", "SE", "S", "SW", "W", "NW"])
+
+
+        street_name = choice(cls._street_names)["value"]
+        street_type = choice(cls._street_types)["value"]
+        replacement = " ".join(
+            filter(None, [
+                str(number),
+                pre_direction,
+                street_name,
+                street_type,
+                post_direction,
+            ])
+        ).strip()
+
+        return replacement
 
 
 class CityTag(Tag):
