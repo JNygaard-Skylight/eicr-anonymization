@@ -11,6 +11,7 @@ class NormalizedTagGroup:
         self._group: set[Tag] = {tag}
         self._type = tag.__class__
         self._normalized_tag = tag.__class__(text=tag.normalized_text, attributes=tag.attributes)
+        self._replace_mapping = None
 
     def __len__(self):
         """Return the number of items in the cache."""
@@ -54,13 +55,6 @@ class NormalizedTagGroups:
         if tag_hash not in self._groups:
             self._groups[tag_hash] = NormalizedTagGroup(tag)
         self._groups[tag_hash].add(tag)
-
-    def __getitem__(self, tag_hash: int) -> set[Tag]:
-        """Get the tags for a given hash."""
-        if tag_hash in self._groups:
-            return self._groups[tag_hash]
-        else:
-            raise KeyError(f"Tag hash {tag_hash} not found in cache.")
 
     def __iter__(self):
         """Iterate over the cache."""

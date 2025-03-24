@@ -26,6 +26,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "defusedxml" },
+    { name = "hi-dateinfer" },
     { name = "lxml" },
     { name = "pyyaml" },
     { name = "rapidfuzz" },
@@ -43,6 +44,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "defusedxml", specifier = ">=0.7.1" },
+    { name = "hi-dateinfer", specifier = ">=0.4.6" },
     { name = "lxml", specifier = ">=5.3.1" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "rapidfuzz", specifier = ">=3.12.2" },
@@ -55,6 +57,19 @@ requires-dist = [
 dev = [
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "pytest-repeat", specifier = ">=0.9.3" },
+]
+
+[[package]]
+name = "hi-dateinfer"
+version = "0.4.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytz" },
+    { name = "wheel" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3e/73/447b4f9019909e9d94c67a9892b75d52df29850887cefa06d194ce6615ea/hi-dateinfer-0.4.6.tar.gz", hash = "sha256:e2ded27aeb15ee6fcda0a30c2a341acbdaaa5b95c1c4db4c4680a4dbcda35c54", size = 18451 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/13/c7/868b174e83cf03ffa8ad4cb70d121278f5691abed1ade1b19485de869e3e/hi_dateinfer-0.4.6-py3-none-any.whl", hash = "sha256:46d27ccc875890315eec9d71d76c2306e84388c4a88106d2f768a921debb49e8", size = 17709 },
 ]
 
 [[package]]
@@ -163,6 +178,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pytz"
+version = "2025.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/5f/57/df1c9157c8d5a05117e455d66fd7cf6dbc46974f832b1058ed4856785d8a/pytz-2025.1.tar.gz", hash = "sha256:c2db42be2a2518b28e65f9207c4d05e6ff547d1efa4086469ef855e4ab70178e", size = 319617 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/eb/38/ac33370d784287baa1c3d538978b5e2ea064d4c1b93ffbd12826c190dd10/pytz-2025.1-py2.py3-none-any.whl", hash = "sha256:89dd22dca55b46eac6eda23b2d72721bf1bdfef212645d81513ef5d03038de57", size = 507930 },
+]
+
+[[package]]
 name = "pyyaml"
 version = "6.0.2"
 source = { registry = "https://pypi.org/simple" }
@@ -234,4 +258,13 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/9e/73/80d6a137655c431404d3179ba104a9807f339bbb55ca18a156d6840b09ed/usaddress-0.5.11.tar.gz", hash = "sha256:eec4c473b94e2a29350ee335f18bac7fe4fa698e08271211dad5fed63bdd3e60", size = 911835 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/3b/41/884d67e033e238788c876c608dc2ec195e2cba313d34016b58400763269f/usaddress-0.5.11-py3-none-any.whl", hash = "sha256:a745be0ff0c525d64463f19f2ec798bb1679a9bb6864b0d9a8b9054023f683b5", size = 67919 },
+]
+
+[[package]]
+name = "wheel"
+version = "0.45.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/8a/98/2d9906746cdc6a6ef809ae6338005b3f21bb568bea3165cfc6a243fdc25c/wheel-0.45.1.tar.gz", hash = "sha256:661e1abd9198507b1409a20c02106d9670b2576e916d58f520316666abca6729", size = 107545 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl", hash = "sha256:708e7481cc80179af0e556bbf0cc00b8444c7321e2700b8d8580231d13017248", size = 72494 },
 ]
