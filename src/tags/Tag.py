@@ -425,148 +425,73 @@ class NameTag(Tag):
         return replacement
 
 
-class TimeTag(Tag):
+class TemporalTag(Tag):
+    """Temporal tag class."""
+
+    sensitive_attr = ("value",)
+    SECONDS_IN_100_YEARS = int(100 * 60 * 60 * 24 * 365.25)
+    # The main offset is a random number of seconds between 0 and 100 years
+    main_offset = randint(0, SECONDS_IN_100_YEARS)
+
+    @classmethod
+    def get_replacement_mapping(
+        cls,
+        normalized_tag: Tag,
+        raw_values: set["Tag"],
+    ) -> dict[str, str]:
+        """Get a replacement value."""
+        # Convert the value into a datetime object
+        # Indfering datetime format is hard. So far I have seen 3 formats:
+        # 1. YYYYMMDDHHMMSS
+        # 2. YYYYMMDDHHMMSS+/-HHMM
+        # 3. YYYYMMDD
+        known_formats = [
+            "%Y%m%d%H%M%S",
+            "%Y%m%d%H%M%S%z",
+            "%Y%m%d",
+        ]
+        # Check if the value is in one of the known formats
+        for fmt in known_formats:
+            try:
+                date_time = datetime.strptime(normalized_tag.attributes["value"], fmt)
+                break
+            except ValueError:
+                continue
+
+        date_time = date_time - timedelta(seconds=cls.main_offset)
+
+        mapping = {}
+        for tag in raw_values:
+            attribute_replacements = tag.attributes.copy() if tag.attributes else None
+            attribute_replacements["value"] = date_time.strftime(fmt)
+
+            mapping[tag] = tag.__class__(text=tag.text, attributes=attribute_replacements)
+
+        return mapping
+
+
+class TimeTag(TemporalTag):
     """Time tag class."""
 
     name = "time"
-    sensitive_attr = ("value",)
-    SECONDS_IN_100_YEARS = int(100 * 60 * 60 * 24 * 365.25)
-    SECONDS_IN_DAY = 60 * 60 * 24
-    # The main offset is a random number of seconds between 0 and 100 years
-    main_offset = randint(0, SECONDS_IN_100_YEARS)
-
-    @classmethod
-    def get_replacement_mapping(
-        cls,
-        normalized_tag: Tag,
-        raw_values: set["Tag"],
-    ) -> dict[str, str]:
-        """Get a replacement value."""
-        # Convert the value into a datetime object
-        # Indfering datetime format is hard. So far I have seen 3 formats:
-        # 1. YYYYMMDDHHMMSS
-        # 2. YYYYMMDDHHMMSS+/-HHMM
-        # 3. YYYYMMDD
-        known_formats = [
-            "%Y%m%d%H%M%S",
-            "%Y%m%d%H%M%S%z",
-            "%Y%m%d",
-        ]
-        # Check if the value is in one of the known formats
-        for fmt in known_formats:
-            try:
-                date_time = datetime.strptime(normalized_tag.attributes["value"], fmt)
-                break
-            except ValueError:
-                continue
-
-        date_time = date_time - timedelta(seconds=cls.main_offset)
-        date_time = date_time - timedelta(seconds=randint(-cls.SECONDS_IN_DAY, cls.SECONDS_IN_DAY))
-
-        mapping = {}
-        for tag in raw_values:
-            attribute_replacements = tag.attributes.copy() if tag.attributes else None
-            attribute_replacements["value"] = date_time.strftime(fmt)
-
-            mapping[tag] = tag.__class__(text=tag.text, attributes=attribute_replacements)
-
-        return mapping
 
 
-class LowTag(Tag):
+class LowTag(TemporalTag):
     """Low tag class."""
 
     name = "low"
-    sensitive_attr = ("value",)
-    SECONDS_IN_100_YEARS = int(100 * 60 * 60 * 24 * 365.25)
-    SECONDS_IN_DAY = 60 * 60 * 24
-    # The main offset is a random number of seconds between 0 and 100 years
-    main_offset = randint(0, SECONDS_IN_100_YEARS)
-
-    @classmethod
-    def get_replacement_mapping(
-        cls,
-        normalized_tag: Tag,
-        raw_values: set["Tag"],
-    ) -> dict[str, str]:
-        """Get a replacement value."""
-        # Convert the value into a datetime object
-        # Indfering datetime format is hard. So far I have seen 3 formats:
-        # 1. YYYYMMDDHHMMSS
-        # 2. YYYYMMDDHHMMSS+/-HHMM
-        # 3. YYYYMMDD
-        known_formats = [
-            "%Y%m%d%H%M%S",
-            "%Y%m%d%H%M%S%z",
-            "%Y%m%d",
-        ]
-        # Check if the value is in one of the known formats
-        for fmt in known_formats:
-            try:
-                date_time = datetime.strptime(normalized_tag.attributes["value"], fmt)
-                break
-            except ValueError:
-                continue
-
-        date_time = date_time - timedelta(seconds=cls.main_offset)
-        date_time = date_time - timedelta(seconds=randint(-cls.SECONDS_IN_DAY, cls.SECONDS_IN_DAY))
-
-        mapping = {}
-        for tag in raw_values:
-            attribute_replacements = tag.attributes.copy() if tag.attributes else None
-            attribute_replacements["value"] = date_time.strftime(fmt)
-
-            mapping[tag] = tag.__class__(text=tag.text, attributes=attribute_replacements)
-
-        return mapping
 
 
-class HighTag(Tag):
+class HighTag(TemporalTag):
     """High tag class."""
 
     name = "high"
-    sensitive_attr = ("value",)
-    SECONDS_IN_100_YEARS = int(100 * 60 * 60 * 24 * 365.25)
-    SECONDS_IN_DAY = 60 * 60 * 24
-    # The main offset is a random number of seconds between 0 and 100 years
-    main_offset = randint(0, SECONDS_IN_100_YEARS)
 
-    @classmethod
-    def get_replacement_mapping(
-        cls,
-        normalized_tag: Tag,
-        raw_values: set["Tag"],
-    ) -> dict[str, str]:
-        """Get a replacement value."""
-        # Convert the value into a datetime object
-        # Indfering datetime format is hard. So far I have seen 3 formats:
-        # 1. YYYYMMDDHHMMSS
-        # 2. YYYYMMDDHHMMSS+/-HHMM
-        # 3. YYYYMMDD
-        known_formats = [
-            "%Y%m%d%H%M%S",
-            "%Y%m%d%H%M%S%z",
-            "%Y%m%d",
-        ]
-        # Check if the value is in one of the known formats
-        for fmt in known_formats:
-            try:
-                date_time = datetime.strptime(normalized_tag.attributes["value"], fmt)
-                break
-            except ValueError:
-                continue
 
-        date_time = date_time - timedelta(seconds=cls.main_offset)
-        date_time = date_time - timedelta(seconds=randint(-cls.SECONDS_IN_DAY, cls.SECONDS_IN_DAY))
+class EffectiveTimeTag(Tag):
+    """Effective time tag class."""
 
-        mapping = {}
-        for tag in raw_values:
-            attribute_replacements = tag.attributes.copy() if tag.attributes else None
-            attribute_replacements["value"] = date_time.strftime(fmt)
-
-            mapping[tag] = tag.__class__(text=tag.text, attributes=attribute_replacements)
-
-        return mapping
+    name = "effectiveTime"
 
 
 class IdTag(Tag):
@@ -614,53 +539,5 @@ class IdTag(Tag):
                     attribute_replacements[attr] = value
 
         mapping[tag] = tag.__class__(text=tag.text, attributes=attribute_replacements)
-
-        return mapping
-
-
-class EffectiveTimeTag(Tag):
-    """Effective time tag class."""
-
-    name = "effectiveTime"
-    sensitive_attr = ("value",)
-    SECONDS_IN_100_YEARS = int(100 * 60 * 60 * 24 * 365.25)
-    SECONDS_IN_DAY = 60 * 60 * 24
-    # The main offset is a random number of seconds between 0 and 100 years
-    main_offset = randint(0, SECONDS_IN_100_YEARS)
-
-    @classmethod
-    def get_replacement_mapping(
-        cls,
-        normalized_tag: Tag,
-        raw_values: set["Tag"],
-    ) -> dict[str, str]:
-        """Get a replacement value."""
-        # Convert the value into a datetime object
-        # Indfering datetime format is hard. So far I have seen 3 formats:
-        # 1. YYYYMMDDHHMMSS
-        # 2. YYYYMMDDHHMMSS+/-HHMM
-        # 3. YYYYMMDD
-        known_formats = [
-            "%Y%m%d%H%M%S",
-            "%Y%m%d%H%M%S%z",
-            "%Y%m%d",
-        ]
-        # Check if the value is in one of the known formats
-        for fmt in known_formats:
-            try:
-                date_time = datetime.strptime(normalized_tag.attributes["value"], fmt)
-                break
-            except ValueError:
-                continue
-
-        date_time = date_time - timedelta(seconds=cls.main_offset)
-        date_time = date_time - timedelta(seconds=randint(-cls.SECONDS_IN_DAY, cls.SECONDS_IN_DAY))
-
-        mapping = {}
-        for tag in raw_values:
-            attribute_replacements = tag.attributes.copy() if tag.attributes else None
-            attribute_replacements["value"] = date_time.strftime(fmt)
-
-            mapping[tag] = tag.__class__(text=tag.text, attributes=attribute_replacements)
 
         return mapping
