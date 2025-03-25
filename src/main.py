@@ -13,11 +13,17 @@ from tags.Tag import Tag
 
 logger = logging.getLogger(__name__)
 
-_namespace = "urn:hl7-org:v3"
-_namespaces = {"ns": _namespace}
+NAMESPACE = "urn:hl7-org:v3"
+NAMESPACES = {"ns": NAMESPACE}
 
 
-def _get_args():
+def _parse_arguments() -> argparse.Namespace:
+    """Parse command-line arguments for the EICR anonymization tool.
+
+    Returns:
+        Parsed command-line arguments
+
+    """
     parser = argparse.ArgumentParser(description="Anonymize EICR data")
     parser.add_argument("input_location", help="Location of the input EICR files")
     parser.add_argument(
@@ -26,59 +32,116 @@ def _get_args():
         action="store_true",
         help="Print replacement value for each field. E.g. Joe Bloggs -> Bobba Fett",
     )
-
     return parser.parse_args()
 
 
-def main():
-    """Anonymize EICR data."""
-    args = _get_args()
+def _delete_old_anonymized_files(input_location: str) -> None:
+    """Remove previously anonymized XML files from the input location.
 
-    previous_output_files = glob.glob(os.path.join(args.input_location, "*.anonymized.xml"))
+    Args:
+        input_location: Directory path containing XML files
+
+    """
+    previous_output_files = glob.glob(os.path.join(input_location, "*.anonymized.xml"))
     for output_file in previous_output_files:
         os.remove(output_file)
 
-    input_location = args.input_location
-    xml_files = glob.glob(os.path.join(input_location, "*.xml"))
 
-    for xml_file in xml_files:
-        with open(xml_file) as file:
-            tree = etree.parse(file)
-        tree = find_and_replace_sensitive_fields(tree, debug=args.debug)
+def _find_elements(root: etree.Element, path: str) -> list[etree.Element]:
+    """Find all elements for a given path with the HL7 namespace in an EICR XML file.
 
-        tree.write(f"{xml_file}.anonymized.xml")
+    Args:
+        root: Root XML element to search
+        path: XPath query to find elements
 
+    Returns:
+        List of matching XML elements
 
-def _find_all_with_namespace(root: etree.Element, path):
-    """Find all elements for a given path with the HL7 namepsace in an EICR XML file.
-
-    Replaces all instances of "ns" in the path with the HL7 namespace.
     """
-    return root.xpath(path, namespaces=_namespaces)
+    return root.xpath(path, namespaces=NAMESPACES)
 
 
-def find_and_replace_sensitive_fields(tree, debug: bool = False) -> str:
-    """Replace sensitive fields in an EICR XML file."""
-    root = tree.getroot()
+def _should_anonymize_element(element: etree.Element, tag: Tag) -> bool:
+    """Determine if an XML element should be anonymized.
+
+    Args:
+        element: XML element to check
+        tag: Tag associated with the element
+
+    Returns:
+        Boolean indicating if the element should be anonymized
+
+    """
+    text_is_nonempty = bool(element.text and element.text.strip())
+    attr_is_sensitive = hasattr(tag, "sensitive_attr") and any(
+        attr in element.attrib for attr in tag.sensitive_attr
+    )
+    return text_is_nonempty or attr_is_sensitive
+
+
+def _build_xpath_query(instance) -> str:
+    """Construct an XPath query to find a specific XML element.
+
+    Args:
+        instance: Tag instance to find
+
+    Returns:
+        Constructed XPath query string
+
+    """
+    xpath_parts = [f".//ns:{instance.name}"]
+
+    if instance.text:
+        xpath_parts.append(f"[text()='{instance.text}']")
+
+    if instance.attributes:
+        for attr_name, attr_value in instance.attributes.items():
+            xpath_parts.append(f'[@{attr_name}="{attr_value}"]')
+    else:
+        xpath_parts.append("[not(@*)]")
+
+    return "".join(xpath_parts)
+
+
+def collect_sensitive_tag_groups(root: etree.Element) -> NormalizedTagGroups:
+    """Collect sensitive tag groups from the XML root.
+
+    Args:
+        root: Root XML element to search
+
+    Returns:
+        NormalizedTagGroups containing sensitive tags
+
+    """
     sensitive_tag_groups = NormalizedTagGroups()
     tag_registry = Tag.get_registry().values()
 
     for tag in tag_registry:
-        elements = _find_all_with_namespace(root, f".//ns:{tag.name}")
+        elements = _find_elements(root, f".//ns:{tag.name}")
         for element in elements:
-            text_is_nonempty = element.text and element.text.strip()
-            attr_is_sensitive = hasattr(tag, "sensitive_attr") and any(
-                attr in element.attrib for attr in tag.sensitive_attr
-            )
-            if not (text_is_nonempty or attr_is_sensitive):
-                continue
+            if _should_anonymize_element(element, tag):
+                tag_instance = tag(
+                    text=element.text,
+                    attributes=dict(element.attrib),
+                )
+                sensitive_tag_groups.add(tag_instance)
 
-            tag_instance = tag(
-                text=element.text,
-                attributes=dict(element.attrib),
-            )
-            sensitive_tag_groups.add(tag_instance)
+    return sensitive_tag_groups
 
+
+def replace_sensitive_information(
+    root: etree.Element, sensitive_tag_groups: NormalizedTagGroups
+) -> list[tuple[Tag, Tag]]:
+    """Replace sensitive information in the XML root.
+
+    Args:
+        root: Root XML element to modify
+        sensitive_tag_groups: Collected sensitive tag groups
+
+    Returns:
+        List of debug output containing original and replacement tags
+
+    """
     debug_output = []
 
     for tag_group in sensitive_tag_groups:
@@ -86,36 +149,58 @@ def find_and_replace_sensitive_fields(tree, debug: bool = False) -> str:
 
         for instance in tag_group:
             replacement = replacement_mapping[instance]
+            xpath = _build_xpath_query(instance)
 
-            xpath_parts = [f".//ns:{instance.name}"]
-            if instance.text:
-                xpath_parts.append(f"[text()='{instance.text}']")
-            if instance.attributes:
-                for attr_name, attr_value in instance.attributes.items():
-                    xpath_parts.append(f'[@{attr_name}="{attr_value}"]')
-            else:
-                xpath_parts.append("[not(@*)]")
-
-            xpath = "".join(xpath_parts)
-            matches = _find_all_with_namespace(root, xpath)
+            matches = _find_elements(root, xpath)
 
             for match in matches:
+                # Replace text if applicable
                 if instance.text:
                     match.text = replacement.text
+
+                # Replace attributes
                 for attr, new_val in replacement.attributes.items():
                     if attr in match.attrib:
                         match.attrib[attr] = new_val
 
             debug_output.append([instance, replacement])
 
+    return debug_output
+
+
+def anonymize_eicr_file(xml_file: str, debug: bool = False) -> None:
+    """Anonymize a single EICR XML file.
+
+    Args:
+        xml_file: Path to the XML file to anonymize
+        debug: Flag to enable debug output
+
+    """
+    # Parse the XML file
+    tree = etree.parse(xml_file)
+    root = tree.getroot()
+
+    # Collect sensitive tags
+    sensitive_tag_groups = collect_sensitive_tag_groups(root)
+
+    # Replace sensitive information
+    debug_output = replace_sensitive_information(root, sensitive_tag_groups)
+
+    # Write anonymized file
+    tree.write(f"{xml_file}.anonymized.xml")
+
+    # Print debug information if enabled
     if debug:
-        print_debug(debug_output)
-
-    return tree
+        _print_debug(debug_output)
 
 
-def print_debug(debug_output):
-    """Print debug information for each replacement made."""
+def _print_debug(debug_output: list[tuple[Tag, Tag]]) -> None:
+    """Print debug information for each replacement made.
+
+    Args:
+        debug_output: List of original and replacement tag instances
+
+    """
     print(
         tabulate(
             debug_output,
@@ -123,6 +208,17 @@ def print_debug(debug_output):
             tablefmt="fancy_outline",
         )
     )
+
+
+def main() -> None:
+    """Run the EICR anonymization tool."""
+    logging.basicConfig(level=logging.INFO)
+    args = _parse_arguments()
+    _delete_old_anonymized_files(args.input_location)
+
+    xml_files = glob.glob(os.path.join(args.input_location, "*.xml"))
+    for xml_file in xml_files:
+        anonymize_eicr_file(xml_file, debug=args.debug)
 
 
 if __name__ == "__main__":
