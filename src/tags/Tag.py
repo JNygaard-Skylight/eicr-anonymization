@@ -1,8 +1,8 @@
 """Tag Class."""
 
+import re
 from datetime import datetime, timedelta
 from random import choice, randint, random
-import re
 from typing import ClassVar, Literal, NotRequired, TypedDict
 
 import yaml
@@ -501,8 +501,8 @@ class IdTag(Tag):
     name = "id"
     sensitive_attr = ("extension", "root")
     oid_pattern = re.compile(r"^[0-2](\.(0|[1-9][0-9]*))+$")
-    _root_oids = {}
-    _extension_oids = {}
+    _root_oids: ClassVar[dict[int, dict[str, str]]] = {}
+    _extension_oids: ClassVar[dict[int, dict[str, str]]] = {}
 
     def __init__(self, text=None, attributes=None):
         """Initialize the ID tag."""

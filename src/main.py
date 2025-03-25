@@ -4,7 +4,6 @@ import argparse
 import glob
 import logging
 import os
-import re
 
 from lxml import etree
 from tabulate import tabulate
@@ -35,12 +34,10 @@ def main():
     """Anonymize EICR data."""
     args = _get_args()
 
-    # Remove previous anonymization output files
     previous_output_files = glob.glob(os.path.join(args.input_location, "*.anonymized.xml"))
     for output_file in previous_output_files:
         os.remove(output_file)
 
-    # Read XML files from input location
     input_location = args.input_location
     xml_files = glob.glob(os.path.join(input_location, "*.xml"))
 
@@ -48,38 +45,10 @@ def main():
         with open(xml_file) as file:
             # xml_text = file.read()
             tree = etree.parse(file)
-        updated_xml = simple_replacement_regex(tree, debug=args.debug)
+        updated_xml = find_and_replace_sensitive_fields(tree, debug=args.debug)
 
         with open(f"{xml_file}.anonymized.xml", "w", encoding="utf-8") as f:
             f.write(updated_xml)
-
-
-def parse_attributes(tag: str) -> dict:
-    """Extract attributes from an XML tag string into a dictionary.
-
-    For example, from:
-        <prefix bar="FIZZ" other="BUZZ">
-    it returns:
-        {"bar": "FIZZ", "other": "BUZZ"}.
-    """
-    return dict(re.findall(r'([\w:.-]+)\s*=\s*["\'](.*?)["\']', tag))
-
-
-def normalize_text(text: str, data_cache: dict) -> str:
-    """Normalize text by removing punctuation and converting to lowercase."""
-    text = text.lower().replace(".", "")
-    return text
-
-
-def print_replacements(replacement_mappings: dict):
-    """Print debug information for a given tag."""
-    print(
-        tabulate(
-            replacement_mappings.items(),
-            headers=["Orginal", "Replacement"],
-            tablefmt="outline",
-        )
-    )
 
 
 def find_all_with_namespace(root: etree.Element, path):
@@ -90,67 +59,72 @@ def find_all_with_namespace(root: etree.Element, path):
     return root.xpath(path, namespaces=_namespaces)
 
 
-def simple_replacement_regex(tree, debug: bool = False) -> str:
-    """Replace sensitive fields in an EICR XML file using regex."""
+def find_and_replace_sensitive_fields(tree, debug: bool = False) -> str:
+    """Replace sensitive fields in an EICR XML file."""
     root = tree.getroot()
-    data_caches = NormalizedTagGroups()
-    for tag in Tag.get_registry().values():
-        matches = find_all_with_namespace(root, f".//ns:{tag.name}")
-        for element in matches:
-            if (element.text and element.text.strip()) or (
-                hasattr(tag, "sensitive_attr")
-                and any(attr in element.attrib for attr in tag.sensitive_attr)
-            ):
-                # Create an instance of the tag and add it to the data cache
-                tag_instance = tag(
-                    text=element.text,
-                    attributes=dict(element.attrib),
-                )
-                data_caches.add(tag_instance)
-            else:
+    sensitive_tag_groups = NormalizedTagGroups()
+    tag_registry = Tag.get_registry().values()
+
+    for tag in tag_registry:
+        elements = find_all_with_namespace(root, f".//ns:{tag.name}")
+        for element in elements:
+            text_is_nonempty = element.text and element.text.strip()
+            attr_is_sensitive = hasattr(tag, "sensitive_attr") and any(
+                attr in element.attrib for attr in tag.sensitive_attr
+            )
+            if not (text_is_nonempty or attr_is_sensitive):
                 continue
+
+            tag_instance = tag(
+                text=element.text,
+                attributes=dict(element.attrib),
+            )
+            sensitive_tag_groups.add(tag_instance)
 
     debug_output = []
 
-    for tag_group in data_caches:
+    for tag_group in sensitive_tag_groups:
         replacement_mapping = tag_group.get_replacement_mapping()
 
         for instance in tag_group:
-            xpath = f".//ns:{instance.name}"
+            replacement = replacement_mapping[instance]
+
+            xpath_parts = [f".//ns:{instance.name}"]
             if instance.text:
-                xpath += f"[text()='{instance.text}']"
+                xpath_parts.append(f"[text()='{instance.text}']")
             if instance.attributes:
-                for attribute in instance.attributes:
-                    xpath += f'[@{attribute}="{instance.attributes[attribute]}"]'
+                for attr_name, attr_value in instance.attributes.items():
+                    xpath_parts.append(f'[@{attr_name}="{attr_value}"]')
             else:
-                xpath += "[not(@*)]"
+                xpath_parts.append("[not(@*)]")
+
+            xpath = "".join(xpath_parts)
             matches = find_all_with_namespace(root, xpath)
 
             for match in matches:
                 if instance.text:
-                    match.text = replacement_mapping[instance].text
-                for attribute in match.attrib:
-                    if attribute in replacement_mapping[instance].attributes:
-                        match.attrib[attribute] = replacement_mapping[instance].attributes[
-                            attribute
-                        ]
+                    match.text = replacement.text
+                for attr, new_val in replacement.attributes.items():
+                    if attr in match.attrib:
+                        match.attrib[attr] = new_val
 
-            debug_output.append(
-                [
-                    instance,
-                    replacement_mapping[instance],
-                ]
-            )
+            debug_output.append([instance, replacement])
 
     if debug:
-        print(
-            tabulate(
-                debug_output,
-                headers=["Original", "Replacement"],
-                tablefmt="fancy_outline",
-            )
-        )
+        print_debug(debug_output)
+
     return etree.tostring(root, encoding="unicode")
+
+
+def print_debug(debug_output):
+    """Print debug information for each replacement made."""
+    print(
+        tabulate(
+            debug_output,
+            headers=["Original", "Replacement"],
+            tablefmt="fancy_outline",
+        )
+    )
 
 
 if __name__ == "__main__":
