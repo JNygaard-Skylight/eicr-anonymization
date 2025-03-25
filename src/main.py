@@ -43,15 +43,13 @@ def main():
 
     for xml_file in xml_files:
         with open(xml_file) as file:
-            # xml_text = file.read()
             tree = etree.parse(file)
-        updated_xml = find_and_replace_sensitive_fields(tree, debug=args.debug)
+        tree = find_and_replace_sensitive_fields(tree, debug=args.debug)
 
-        with open(f"{xml_file}.anonymized.xml", "w", encoding="utf-8") as f:
-            f.write(updated_xml)
+        tree.write(f"{xml_file}.anonymized.xml")
 
 
-def find_all_with_namespace(root: etree.Element, path):
+def _find_all_with_namespace(root: etree.Element, path):
     """Find all elements for a given path with the HL7 namepsace in an EICR XML file.
 
     Replaces all instances of "ns" in the path with the HL7 namespace.
@@ -66,7 +64,7 @@ def find_and_replace_sensitive_fields(tree, debug: bool = False) -> str:
     tag_registry = Tag.get_registry().values()
 
     for tag in tag_registry:
-        elements = find_all_with_namespace(root, f".//ns:{tag.name}")
+        elements = _find_all_with_namespace(root, f".//ns:{tag.name}")
         for element in elements:
             text_is_nonempty = element.text and element.text.strip()
             attr_is_sensitive = hasattr(tag, "sensitive_attr") and any(
@@ -99,7 +97,7 @@ def find_and_replace_sensitive_fields(tree, debug: bool = False) -> str:
                 xpath_parts.append("[not(@*)]")
 
             xpath = "".join(xpath_parts)
-            matches = find_all_with_namespace(root, xpath)
+            matches = _find_all_with_namespace(root, xpath)
 
             for match in matches:
                 if instance.text:
@@ -113,7 +111,7 @@ def find_and_replace_sensitive_fields(tree, debug: bool = False) -> str:
     if debug:
         print_debug(debug_output)
 
-    return etree.tostring(root, encoding="unicode")
+    return tree
 
 
 def print_debug(debug_output):
