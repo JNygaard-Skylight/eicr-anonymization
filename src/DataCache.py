@@ -1,52 +1,91 @@
 """Data Cache Module."""
 
+from collections.abc import Iterator
+
 from tags.Tag import Tag
 
 
 class NormalizedTagGroup:
-    """A simple data cache class."""
+    """A group of tags with the same normalized text and attributes."""
 
     def __init__(self, tag: Tag):
-        """Initialize the data cache."""
+        """Initialize a tag group with the first tag.
+
+        Args:
+            tag: The initial tag to create the group with
+
+        """
         self._group: set[Tag] = {tag}
         self._type = tag.__class__
-        self._normalized_tag = tag.__class__(text=tag.normalized_text, attributes=tag.attributes)
-        self._replace_mapping = None
+        self._normalized_tag = self.type(text=tag.normalized_text, attributes=tag.attributes)
 
     def __len__(self):
-        """Return the number of items in the cache."""
+        """Get the number of tags in the group.
+
+        Returns:
+            Number of tags in the group
+
+        """
         return len(self._group)
 
-    def __iter__(self):
-        """Iterate over the cache."""
-        yield from self._group
+    def __iter__(self) -> Iterator[Tag]:
+        """Provide an iterator over the tags in the group.
+
+        Returns:
+            Iterator of tags
+
+        """
+        return iter(self._group)
 
     @property
-    def type(self):
-        """Return the type of the tag."""
-        return self._type
+    def type(self) -> Tag:
+        """Get the class type of the tags in the group.
 
-    def add(self, tag: Tag):
-        """Add a tag to the cache."""
-        if tag.__class__ == self._type:
+        Returns:
+            Tag class type
+
+        """
+        return self._typ
+
+    def add(self, tag: Tag) -> None:
+        """Add a tag to the group.
+
+        Args:
+            tag: Tag to add to the group
+
+        Raises:
+            TypeError: If the tag type does not match the group Tag type
+
+        """
+        if isinstance(tag, self.type):
             self._group.add(tag)
         else:
-            raise TypeError(f"Tag type {tag.__class__} does not match group type {self._type}.")
+            raise TypeError(f"Tag type {tag.__class__} does not match group type {self.type}.")
 
-    def get_replacement_mapping(self):
-        """Get the replacement mapping for the group."""
+    def get_replacement_mapping(self) -> dict[Tag, Tag]:
+        """Generate mapping from the orginal tag to the replacement tag.
+
+        Returns:
+            Mapping from the orginal tag to the replacement tag.
+
+        """
         return self._type.get_replacement_mapping(self._normalized_tag, self._group)
 
 
 class NormalizedTagGroups:
-    """A simple data cache class."""
+    """The main data structure for storing tag instances."""
 
     def __init__(self):
-        """Initialize the data cache."""
+        """Initialize the data structure."""
         self._groups: dict[int, set[Tag]] = {}
 
-    def __len__(self):
-        """Return the number of items in the cache."""
+    def __len__(self) -> int:
+        """Get the total number of tag groups, i.e., the number of unique normalized tags.
+
+        Returns:
+            Number of tag groups, i.e., the number of unique normalized tags
+
+        """
         return len(self._groups)
 
     def add(self, tag: Tag):

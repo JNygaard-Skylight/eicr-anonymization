@@ -133,7 +133,7 @@ class Tag:
         cls,
         normalized_tag: "Tag",
         raw_values: set["Tag"],
-    ) -> dict[str, str]:
+    ) -> dict["Tag", "Tag"]:
         """Get a replacement mapping."""
         replacement = cls.get_replacement_value(raw_values)
 

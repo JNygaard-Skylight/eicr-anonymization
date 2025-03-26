@@ -7,6 +7,7 @@ import os
 
 from lxml import etree
 from tabulate import tabulate
+from tqdm import tqdm
 
 from DataCache import NormalizedTagGroups
 from tags.Tag import Tag
@@ -103,7 +104,7 @@ def _build_xpath_query(instance) -> str:
     return "".join(xpath_parts)
 
 
-def collect_sensitive_tag_groups(root: etree.Element) -> NormalizedTagGroups:
+def _collect_sensitive_tag_groups(root: etree.Element) -> NormalizedTagGroups:
     """Collect sensitive tag groups from the XML root.
 
     Args:
@@ -129,7 +130,7 @@ def collect_sensitive_tag_groups(root: etree.Element) -> NormalizedTagGroups:
     return sensitive_tag_groups
 
 
-def replace_sensitive_information(
+def _replace_sensitive_information(
     root: etree.Element, sensitive_tag_groups: NormalizedTagGroups
 ) -> list[tuple[Tag, Tag]]:
     """Replace sensitive information in the XML root.
@@ -181,10 +182,10 @@ def anonymize_eicr_file(xml_file: str, debug: bool = False) -> None:
     root = tree.getroot()
 
     # Collect sensitive tags
-    sensitive_tag_groups = collect_sensitive_tag_groups(root)
+    sensitive_tag_groups = _collect_sensitive_tag_groups(root)
 
     # Replace sensitive information
-    debug_output = replace_sensitive_information(root, sensitive_tag_groups)
+    debug_output = _replace_sensitive_information(root, sensitive_tag_groups)
 
     # Write anonymized file
     tree.write(f"{xml_file}.anonymized.xml")
@@ -217,7 +218,7 @@ def main() -> None:
     _delete_old_anonymized_files(args.input_location)
 
     xml_files = glob.glob(os.path.join(args.input_location, "*.xml"))
-    for xml_file in xml_files:
+    for xml_file in tqdm(xml_files, desc="Anonymizing eICR files"):
         anonymize_eicr_file(xml_file, debug=args.debug)
 
 
