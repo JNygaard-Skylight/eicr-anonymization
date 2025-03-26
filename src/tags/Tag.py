@@ -65,16 +65,6 @@ def _match_formatting(old_value: str, new_value: str) -> str:
     )
 
 
-def _map_values_to_formatted_replacement(
-    raw_values: set["Tag"], replacement: str
-) -> dict["Tag", "Tag"]:
-    """Map raw values to a replacement value and match the whitespace and case."""
-    mappings = {}
-    for raw_value in raw_values:
-        mappings[raw_value] = _match_formatting(raw_value, replacement)
-    return mappings
-
-
 def _get_random_int(digits: int):
     """Get a random integer with the specified number of digits."""
     return randint(10 ** (digits - 1), 10**digits - 1)
@@ -587,3 +577,9 @@ class IdTag(Tag):
             else:
                 replacement += char
         return replacement
+
+
+class TextTag(Tag):
+    """Text tag class."""
+
+    name = "text"

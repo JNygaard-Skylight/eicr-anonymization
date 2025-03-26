@@ -45,7 +45,7 @@ class NormalizedTagGroup:
             Tag class type
 
         """
-        return self._typ
+        return self._type
 
     def add(self, tag: Tag) -> None:
         """Add a tag to the group.
