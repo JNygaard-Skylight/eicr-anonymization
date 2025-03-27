@@ -17,6 +17,9 @@ dev = ["pytest>=8.3.5", "pytest-repeat>=0.9.3"]
 [tool.ruff]
 fix = true
 line-length = 100
+exclude = [
+  "__init__.py"
+]
 
 [tool.ruff.lint]
 select = [
@@ -41,8 +44,11 @@ select = [
 ]
 ignore = [
   "S311", # suspicious-non-cryptographic-random-usage
-  "S320", # suspicious-xmle-tree-usage
+  "S320"  # suspicious-xmle-tree-usage - deprecated
 ]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = [
