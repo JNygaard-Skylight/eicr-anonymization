@@ -518,40 +518,45 @@ class IdTag(Tag):
         cls,
         normalized_tag: Tag,
         raw_values: set[Tag],
-    ) -> dict[str, str]:
-        """Get a replacement mapping."""
-        sensitive_attr_replacements = None
-        sensitive_attr_replacements = {}
-
+    ) -> dict[Tag, Tag]:
+        """Get a replacement mapping for sensitive attributes."""
+        # Build a dictionary of sensitive attribute replacements.
         if cls.oid_pattern.match(normalized_tag.attributes["root"]):
-            replacement_parts = []
             segments = normalized_tag.attributes["root"].split(".")
-            for i, segment in enumerate(segments):
-                if segment in cls._root_oids[i]:
-                    replacement_parts.append(str(cls._root_oids[i][segment]))
-                else:
-                    raise ValueError(
-                        f"Segment {segment} not found in root OID mapping for {normalized_tag.name}"
-                    )
-            sensitive_attr_replacements["root"] = ".".join(replacement_parts)
+            try:
+                replacement_parts = [
+                    str(cls._root_oids[i][segment]) for i, segment in enumerate(segments)
+                ]
+            except KeyError as exc:
+                raise ValueError(
+                    f"Segment {exc.args[0]} not found in root OID mapping for {normalized_tag.name}"
+                ) from exc
+
+            sensitive_attr_replacements = {"root": ".".join(replacement_parts)}
             if "extension" in normalized_tag.attributes:
                 sensitive_attr_replacements["extension"] = cls.random_alpha_digits(
                     normalized_tag.attributes["extension"]
                 )
         else:
-            for sensitive_attr_key in cls.sensitive_attr:
-                for key, value in normalized_tag.attributes.items():
-                    if key == sensitive_attr_key:
-                        sensitive_attr_replacements[key] = cls.random_alpha_digits(value)
+            # Replace all attributes designated as sensitive.
+            sensitive_attr_replacements = {
+                attr: cls.random_alpha_digits(normalized_tag.attributes[attr])
+                for attr in cls.sensitive_attr
+                if attr in normalized_tag.attributes
+            }
 
+        # Create a new Tag for each raw_value with updated attributes.
         mapping = {}
         for tag in raw_values:
-            attribute_replacements = tag.attributes.copy() if tag.attributes else None
-            for attr, value in sensitive_attr_replacements.items():
-                if attr in attribute_replacements:
-                    attribute_replacements[attr] = value
+            if tag.attributes:
+                updated_attrs = tag.attributes.copy()
+                for attr, repl_value in sensitive_attr_replacements.items():
+                    if attr in updated_attrs:
+                        updated_attrs[attr] = repl_value
+            else:
+                updated_attrs = None
 
-        mapping[tag] = tag.__class__(text=tag.text, attributes=attribute_replacements)
+            mapping[tag] = tag.__class__(text=tag.text, attributes=updated_attrs)
 
         return mapping
 
