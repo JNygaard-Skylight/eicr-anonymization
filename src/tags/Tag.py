@@ -285,9 +285,11 @@ class StreetAddressTag(Tag):
         pre_direction = ""
         post_direction = ""
         direction_type = random()
-        if direction_type < 0.33:
+        pre_direction_chance = 0.33
+        post_direction_chance = 0.67
+        if direction_type < pre_direction_chance:
             pre_direction = choice(["N", "NE", "E", "SE", "S", "SW", "W", "NW"])
-        elif direction_type < 0.66:
+        elif direction_type < post_direction_chance:
             post_direction = choice(["N", "NE", "E", "SE", "S", "SW", "W", "NW"])
 
         street_name = choice(cls._street_names)["value"]
@@ -348,7 +350,8 @@ class PostalCodeTag(Tag):
     ) -> dict[str, str]:
         """Get a replacement value."""
         replacement = str(_get_random_int(5))
-        if random() < 0.5:
+        extended_zip_chance = 0.5
+        if random() < extended_zip_chance:
             replacement += f"-{_get_random_int(4)!s}"
 
         return replacement
@@ -368,7 +371,8 @@ class TelecomTag(Tag):
         """Get a replacement value."""
         replacement = ""
 
-        if random() < 0.5:
+        telephone_chance = 0.5
+        if random() < telephone_chance:
             replacement = f"tel:{randint(0, 9)}-555-{randint(0, 999)}-{randint(0, 9999)}"
         else:
             replacement = f"mailto:email{randint(0, 999)}@example.com"
