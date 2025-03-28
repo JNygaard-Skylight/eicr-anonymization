@@ -2,7 +2,7 @@
 
 from collections.abc import Iterator
 
-from tags.Tag import Tag
+from eicr_anonymization.tags.Tag import Tag
 
 
 class NormalizedTagGroup:

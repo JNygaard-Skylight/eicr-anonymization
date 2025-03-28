@@ -1,39 +1,22 @@
 """Main module for the EICR anonymization tool."""
 
-import argparse
 import glob
 import logging
 import os
+from argparse import Namespace
 
 from lxml import etree
+from lxml.etree import Element
 from tabulate import tabulate
 from tqdm import tqdm
 
-from DataCache import NormalizedTagGroups
-from tags.Tag import Tag
+from eicr_anonymization.data_cache import NormalizedTagGroups
+from eicr_anonymization.tags.Tag import Tag
 
 logger = logging.getLogger(__name__)
 
 NAMESPACE = "urn:hl7-org:v3"
 NAMESPACES = {"ns": NAMESPACE}
-
-
-def _parse_arguments() -> argparse.Namespace:
-    """Parse command-line arguments for the EICR anonymization tool.
-
-    Returns:
-        Parsed command-line arguments
-
-    """
-    parser = argparse.ArgumentParser(description="Anonymize EICR data")
-    parser.add_argument("input_location", help="Location of the input EICR files")
-    parser.add_argument(
-        "--debug",
-        "-d",
-        action="store_true",
-        help="Print replacement value for each field. E.g. Joe Bloggs -> Bobba Fett",
-    )
-    return parser.parse_args()
 
 
 def _delete_old_anonymized_files(input_location: str) -> None:
@@ -48,7 +31,7 @@ def _delete_old_anonymized_files(input_location: str) -> None:
         os.remove(output_file)
 
 
-def _find_elements(root: etree.Element, path: str) -> list[etree.Element]:
+def _find_elements(root: Element, path: str) -> list[Element]:
     """Find all elements for a given path with the HL7 namespace in an EICR XML file.
 
     Args:
@@ -62,7 +45,7 @@ def _find_elements(root: etree.Element, path: str) -> list[etree.Element]:
     return root.xpath(path, namespaces=NAMESPACES)
 
 
-def _should_anonymize_element(element: etree.Element, tag: Tag) -> bool:
+def _should_anonymize_element(element: Element, tag: Tag) -> bool:
     """Determine if an XML element should be anonymized.
 
     Args:
@@ -104,7 +87,7 @@ def _build_xpath_query(instance) -> str:
     return "".join(xpath_parts)
 
 
-def _collect_sensitive_tag_groups(root: etree.Element) -> NormalizedTagGroups:
+def _collect_sensitive_tag_groups(root: Element) -> NormalizedTagGroups:
     """Collect sensitive tag groups from the XML root.
 
     Args:
@@ -131,7 +114,7 @@ def _collect_sensitive_tag_groups(root: etree.Element) -> NormalizedTagGroups:
 
 
 def _replace_sensitive_information(
-    root: etree.Element, sensitive_tag_groups: NormalizedTagGroups
+    root: Element, sensitive_tag_groups: NormalizedTagGroups
 ) -> list[tuple[Tag, Tag]]:
     """Replace sensitive information in the XML root.
 
@@ -211,16 +194,10 @@ def _print_debug(debug_output: list[tuple[Tag, Tag]]) -> None:
     )
 
 
-def main() -> None:
-    """Run the EICR anonymization tool."""
-    logging.basicConfig(level=logging.INFO)
-    args = _parse_arguments()
+def anonymize(args: Namespace) -> None:
+    """Run the EICR anonymization process."""
     _delete_old_anonymized_files(args.input_location)
 
     xml_files = glob.glob(os.path.join(args.input_location, "*.xml"))
     for xml_file in tqdm(xml_files, desc="Anonymizing eICR files"):
         anonymize_eicr_file(xml_file, debug=args.debug)
-
-
-if __name__ == "__main__":
-    main()

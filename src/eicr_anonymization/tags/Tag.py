@@ -19,7 +19,7 @@ class ReplacementType(TypedDict):
 
 def _read_yaml(file_name: str) -> list[ReplacementType]:
     """Read a YAML file and return its contents as a list of strings."""
-    with open("src/star-wars-data/" + file_name) as file:
+    with open("src/eicr_anonymization/star-wars-data/" + file_name) as file:
         return yaml.safe_load(file)
 
 

@@ -11,6 +11,9 @@ dependencies = [
   "tqdm>=4.67.1",
 ]
 
+[project.scripts]
+anonymize = "eicr_anonymization.__main__:main"
+
 [dependency-groups]
 dev = ["pytest>=8.3.5", "pytest-repeat>=0.9.3"]
 
@@ -44,7 +47,7 @@ select = [
 ]
 ignore = [
   "S311", # suspicious-non-cryptographic-random-usage
-  "S320"  # suspicious-xmle-tree-usage - deprecated
+  "S320", # suspicious-xmle-tree-usage - deprecated
 ]
 
 [tool.ruff.lint.pydocstyle]
