@@ -1,8 +1,8 @@
 # eICR Anonymization Tool
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
-[!CAUTION]
-This tool should be considered to be in an early **alpha** (not feature complete) state. At this stage you should assume sensitive data will be missed, or otherwise inappropaitely removed or replaced. Every anonimyzed eICR should be thorughly checked for sensitive data.
+> [!CAUTION]
+> This tool should be considered to be in an early **alpha** (not feature complete) state. At this stage you should assume sensitive data will be left in, or otherwise inappropaitely removed or replaced. Every anonimyzed eICR should be thorughly checked for sensitive data.
 
 ## Overview
 This tool removes and replaces sensitive data in eICR XML files with Star Wars–themed fake data. The aim is to preserve the original structure, formatting, and relationships found in real-world eICRs so that the resulting files can still be useful for testing and development. By replacing data with plausible but clearly fictitious values, it becomes possible to share eICRs for troubleshooting or collaboration without exposing private information.
