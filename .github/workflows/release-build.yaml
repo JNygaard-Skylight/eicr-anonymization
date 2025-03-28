@@ -22,12 +22,9 @@ jobs:
 
       - name: Build the distribution
         run: python -m build
-        # --> dist/*.whl and dist/*.tar.gz are created
 
-      - name: Upload Wheel as a Release Asset
-        uses: actions/upload-release-asset@v1
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: dist/*.whl
-          asset_name: your_package-0.1.0-py3-none-any.whl
-          asset_content_type: application/octet-stream
+          name: release-dists
+          path: dist/
