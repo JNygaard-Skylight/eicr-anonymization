@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.scripts]
-anonymize = "eicr_anonymization.__main__:main"
+anonymize_eicr = "eicr_anonymization.__main__:main"
 
 [dependency-groups]
 dev = ["pytest>=8.3.5", "pytest-repeat>=0.9.3"]

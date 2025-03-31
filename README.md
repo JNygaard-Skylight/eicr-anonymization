@@ -42,15 +42,16 @@ The tool is designed around the following principles and requirements, in approx
 If using the anonymization tool as a command-line tool outside of a Python virtual environment, it is recommended to use [Pipx](https://pipx.pypa.io/stable/) to avoid dependency conflicts.
 
 ### Installation
-1. Download the wheel (.whl) file from the release page
+1. Clone this repo.
 2. Install:
+   At the root of the directory
    - With Pip:
    ```bash
-   pip install anonymize_eicr.whl
+   pip install .
    ```
     - With Pipx:
    ```bash
-   pipx install anonymize_eicr.whl
+   pipx install .
    ```
 
 ### Use
@@ -63,7 +64,7 @@ This will create a copy of each eicr file prepended with `.anonymized.xml` in th
 #### Help
 ```bash
 anonymize --help
-usage: anonymize [-h] [--debug] input_location
+usage: anonymize_eicr [-h] [--debug] input_location
 
 Anonymize eICR XML files.
 
@@ -74,17 +75,3 @@ options:
   -h, --help      show this help message and exit
   --debug, -d     Print table showing original and replacement tags. Will show sensitive information.
 ```
-
-## Development
-
-
-<!-- Sections left -->
-## Example
-## Development
-### Testing
-### Debugging
-## Use
-### Download/Install
-### Run
-## Future Features
-## Safe Harbor Method Overview
