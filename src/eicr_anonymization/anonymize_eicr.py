@@ -63,7 +63,7 @@ def _should_anonymize_element(element: Element, tag: Tag) -> bool:
     return text_is_nonempty or attr_is_sensitive
 
 
-def _build_xpath_query(instance) -> str:
+def _build_xpath_query(instance: Tag) -> str:
     """Construct an XPath query to find a specific XML element.
 
     Args:

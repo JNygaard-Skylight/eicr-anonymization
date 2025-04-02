@@ -261,7 +261,7 @@ class SuffixTag(Tag):
     replacement_values = _read_yaml("name_suffixes.yaml")
 
 
-class StreetAddressTag(Tag):
+class StreetAddressLineTag(Tag):
     """Street address tag class."""
 
     name = "streetAddressLine"
@@ -272,7 +272,7 @@ class StreetAddressTag(Tag):
     def get_replacement_value(
         cls,
         raw_values: set["Tag"],
-    ) -> dict[str, str]:
+    ) -> str:
         """Get a replacement mapping.
 
         Simple replacement:
@@ -347,7 +347,7 @@ class PostalCodeTag(Tag):
     def get_replacement_value(
         cls,
         raw_values: set[Tag],
-    ) -> dict[str, str]:
+    ) -> str:
         """Get a replacement value."""
         replacement = str(_get_random_int(5))
         extended_zip_chance = 0.5

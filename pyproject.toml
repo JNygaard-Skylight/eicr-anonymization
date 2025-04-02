@@ -1,7 +1,7 @@
 [project]
 name = "eicr-anonymization"
 version = "0.1.0"
-description = "Add your description here"
+description = "Script to anonymize eICR files"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
