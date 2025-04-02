@@ -17,6 +17,9 @@ anonymize_eicr = "eicr_anonymization.__main__:main"
 [dependency-groups]
 dev = ["pytest>=8.3.5", "pytest-repeat>=0.9.3"]
 
+[tool.uv]
+package = "true"
+
 [tool.ruff]
 fix = true
 line-length = 100
