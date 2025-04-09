@@ -1,5 +1,13 @@
+> [!IMPORTANT]
+> **REPOSITORY ARCHIVED**  
+> This repository has been archived and is no longer maintained here.
+> 
+> **The project has moved to an offical CDC repository: [https://github.com/CDCgov/eicr-anonymization](https://github.com/CDCgov/eicr-anonymization)**
+
 # eICR Anonymization Tool
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+
+
 
 > [!CAUTION]
 > This tool should be considered in an early **alpha** (not feature complete) state. At this stage, you should assume sensitive data will be left in, or otherwise inappropriately removed or replaced. Every anonymized eICR should be thoroughly checked for sensitive data.
